@@ -9,6 +9,8 @@ const initialState = {
     profiles: [],
     currentProfile: null,
     currentMemberId: null, // Track which member is logged in
+    balances: {},
+    settlements: [],
     isLoading: false,
     error: null
 };
@@ -27,6 +29,18 @@ const reducer = (state, action) => {
                 is_admin: action.payload.is_admin !== undefined ? action.payload.is_admin : state.is_admin,
                 isLoading: false,
                 error: null
+            };
+        case 'SET_SETTLEMENTS':
+            return {
+                ...state,
+                settlements: action.payload,
+                isLoading: false
+            };
+        case 'SET_BALANCES':
+            return {
+                ...state,
+                balances: action.payload,
+                isLoading: false
             };
         case 'LOGOUT':
             return { ...state, currentProfile: null, currentMemberId: null, is_admin: false };
@@ -53,6 +67,9 @@ export const AppProvider = ({ children }) => {
                     is_admin: state.is_admin
                 }
             });
+            // Also fetch financial data
+            fetchBalances();
+            fetchSettlements();
         } catch (e) {
             console.error("Failed to refresh profile", e);
         }
@@ -168,13 +185,33 @@ export const AppProvider = ({ children }) => {
         }
     };
 
+    const fetchSettlements = async () => {
+        if (!state.currentProfile) return;
+        try {
+            const res = await axios.get(`${API_URL}/groups/${state.currentProfile.id}/settlements/`);
+            dispatch({ type: 'SET_SETTLEMENTS', payload: res.data });
+        } catch (e) {
+            console.error("Failed to fetch settlements", e);
+        }
+    };
+
+    const fetchBalances = async () => {
+        if (!state.currentProfile) return;
+        try {
+            const res = await axios.get(`${API_URL}/groups/${state.currentProfile.id}/balances/`);
+            dispatch({ type: 'SET_BALANCES', payload: res.data });
+        } catch (e) {
+            console.error("Failed to fetch balances", e);
+        }
+    };
+
     return (
         <AppContext.Provider value={{
             state,
             dispatch,
             currentProfile: state.currentProfile,
             currentMemberId: state.currentMemberId,
-            actions: { createProfile, joinGroup, addMember, addReceipt, refreshProfile, getGroupDetails, updateGroupId }
+            actions: { createProfile, joinGroup, addMember, addReceipt, refreshProfile, getGroupDetails, updateGroupId, fetchSettlements, fetchBalances }
         }}>
             {children}
         </AppContext.Provider>

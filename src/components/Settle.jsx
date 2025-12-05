@@ -1,14 +1,10 @@
 import { ArrowRight, Check, CheckCircle2, X } from 'lucide-react';
-import { useMemo } from 'react';
-import { solveDebts } from '../logic/settle';
 import { useAppStore } from '../store/AppStore';
 
-const Settle = ({ onBack, nets }) => {
+const Settle = ({ onBack, settlements }) => {
     const { currentProfile, actions } = useAppStore();
 
-    const transactions = useMemo(() => {
-        return solveDebts(nets);
-    }, [nets]);
+    const transactions = settlements || [];
 
     const handleSettleTransaction = (fromId, toId, amount) => {
         // Create a receipt where 'from' pays 'to' the amount

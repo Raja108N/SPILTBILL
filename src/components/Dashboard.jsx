@@ -1,13 +1,14 @@
-import { ArrowDownLeft, ArrowUpRight, Check, Copy, Edit2, LogOut, Plus, Receipt, RefreshCw, Users, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { calculateNets } from '../logic/settle';
+import { ArrowDownLeft, ArrowRight, ArrowUpRight, Check, ChevronRight, Copy, Edit2, LogOut, Plus, RefreshCw, Users, Wallet, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '../store/AppStore';
 import AddReceipt from './AddReceipt';
+import MemberGallery from './MemberGallery';
 import Settle from './Settle';
 
 const Dashboard = () => {
     const { state, currentProfile, dispatch, actions } = useAppStore();
-    const [view, setView] = useState('dashboard'); // dashboard, add-receipt, settle, add-member
+    const [view, setView] = useState('dashboard'); // dashboard, add-receipt, settle, add-member, member-gallery
+    const [selectedMemberForGallery, setSelectedMemberForGallery] = useState(null);
     const [newMemberName, setNewMemberName] = useState('');
     const [isEditingId, setIsEditingId] = useState(false);
     const [newPublicId, setNewPublicId] = useState('');
@@ -34,10 +35,31 @@ const Dashboard = () => {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const nets = useMemo(() => {
+    useEffect(() => {
+        if (currentProfile?.id) {
+            actions.fetchBalances();
+            actions.fetchSettlements();
+        }
+    }, [currentProfile?.id]);
+
+    const nets = state.balances || {};
+
+    const memberTotals = useMemo(() => {
         if (!currentProfile) return {};
-        return calculateNets(currentProfile.receipts, currentProfile.members);
+        const totals = {};
+        currentProfile.members.forEach(m => totals[m.id] = 0);
+        currentProfile.receipts.forEach(r => {
+            const payerId = r.payer_id || r.payer;
+            if (totals[payerId] !== undefined) {
+                totals[payerId] += parseFloat(r.total);
+            }
+        });
+        return totals;
     }, [currentProfile]);
+
+
+
+    const settlements = state.settlements || [];
 
     const handleAddMember = (e) => {
         e.preventDefault();
@@ -75,10 +97,20 @@ const Dashboard = () => {
                 </div>
                 <div className="flex-1 overflow-y-auto px-4 pb-4">
                     <div className="max-w-2xl mx-auto">
-                        <Settle onBack={() => setView('dashboard')} nets={nets} />
+                        <Settle onBack={() => setView('dashboard')} settlements={settlements} />
                     </div>
                 </div>
             </div>
+        );
+    }
+
+    if (view === 'member-gallery' && selectedMemberForGallery) {
+        return (
+            <MemberGallery
+                memberId={selectedMemberForGallery}
+                currentProfile={currentProfile}
+                onBack={() => setView('dashboard')}
+            />
         );
     }
 
@@ -200,45 +232,64 @@ const Dashboard = () => {
                                 )}
                             </div>
                         </div>
+                        {/* Settlements Section */}
+                        <div className="glass-panel p-5 flex flex-col">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Check size={18} className="text-primary" />
+                                <h2 className="text-lg font-semibold">Settlements</h2>
+                            </div>
+                            <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar">
+                                {settlements.length === 0 ? (
+                                    <p className="text-muted text-sm text-center py-4">All settled up!</p>
+                                ) : (
+                                    settlements.map((t, idx) => (
+                                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-surface/50 border border-white/5">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <span className="font-bold text-white">{currentProfile.members.find(m => m.id === t.from)?.name}</span>
+                                                <ArrowRight size={14} className="text-muted" />
+                                                <span className="font-bold text-white">{currentProfile.members.find(m => m.id === t.to)?.name}</span>
+                                            </div>
+                                            <span className="font-mono font-bold text-primary">£{t.amount.toFixed(2)}</span>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Right Column: Recent Activity */}
+                    {/* Right Column: Amount Spent Summary */}
                     <div className="lg:col-span-7 flex flex-col h-full min-h-[400px]">
                         <div className="glass-panel p-5 flex-1 flex flex-col relative overflow-hidden">
                             <div className="flex items-center gap-2 mb-6 z-10">
-                                <Receipt size={18} className="text-accent" />
-                                <h2 className="text-lg font-semibold">Recent Activity</h2>
+                                <Wallet size={18} className="text-accent" />
+                                <h2 className="text-lg font-semibold">Amount Spent</h2>
                             </div>
 
                             <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar z-10 pb-20">
-                                {currentProfile.receipts.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-muted opacity-50">
-                                        <Receipt size={48} className="mb-4" />
-                                        <p>No receipts yet</p>
-                                    </div>
-                                ) : (
-                                    [...currentProfile.receipts].reverse().map(receipt => {
-                                        const payer = currentProfile.members.find(m => m.id === receipt.payer_id || m.id === receipt.payer);
-                                        return (
-                                            <div key={receipt.id} className="p-4 rounded-xl bg-surface/50 border border-white/5 flex items-center justify-between hover:bg-surface transition-colors group">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-full bg-accent/10 text-accent flex items-center justify-center">
-                                                        <Receipt size={20} />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-white group-hover:text-accent transition-colors">{receipt.description || 'Expense'}</p>
-                                                        <p className="text-xs text-muted">
-                                                            <span className="text-white">{payer?.name || 'Unknown'}</span> paid
-                                                            <span className="mx-1">•</span>
-                                                            {new Date(receipt.created_at).toLocaleDateString()}
-                                                        </p>
-                                                    </div>
+                                {currentProfile.members.map(member => {
+                                    const total = memberTotals[member.id] || 0;
+                                    return (
+                                        <button
+                                            key={member.id}
+                                            onClick={() => { setSelectedMemberForGallery(member.id); setView('member-gallery'); }}
+                                            className="w-full p-4 rounded-xl bg-surface/50 border border-white/5 flex items-center justify-between hover:bg-surface transition-all group hover:border-accent/30 hover:shadow-glow text-left"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-lg font-bold text-muted group-hover:text-white transition-colors border border-white/5">
+                                                    {member.name.charAt(0).toUpperCase()}
                                                 </div>
-                                                <span className="font-bold font-mono text-lg">£{parseFloat(receipt.total).toFixed(2)}</span>
+                                                <div>
+                                                    <span className="block font-semibold text-lg text-white group-hover:text-accent transition-colors">{member.name}</span>
+                                                    <span className="text-sm text-muted">Click for details</span>
+                                                </div>
                                             </div>
-                                        );
-                                    })
-                                )}
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-2xl font-bold font-mono text-white">£{total.toFixed(2)}</span>
+                                                <ChevronRight size={20} className="text-muted group-hover:text-accent transition-colors" />
+                                            </div>
+                                        </button>
+                                    );
+                                })}
                             </div>
 
                             {/* Floating Add Button (Desktop: Bottom Right of this panel, Mobile: Fixed) */}

@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { useAppStore } from '../store/AppStore';
 
 const AddReceipt = ({ onBack }) => {
-    const { currentProfile, actions } = useAppStore();
+    const { currentProfile, actions, currentMemberId } = useAppStore();
     const [step, setStep] = useState(1); // 1: Image/Total, 2: Payer/Split
     const [total, setTotal] = useState('');
     const [description, setDescription] = useState('');
     const [image, setImage] = useState(null); // URL for preview
     const [imageFile, setImageFile] = useState(null); // File object for upload
-    const [payerId, setPayerId] = useState(currentProfile.members[0]?.id);
+    const [payerId, setPayerId] = useState(currentMemberId || currentProfile.members[0]?.id);
     const [selectedMembers, setSelectedMembers] = useState(
         currentProfile.members.map(m => m.id) // Default all selected
     );
