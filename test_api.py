@@ -6,7 +6,7 @@ def log(msg):
     with open('api_test_result.txt', 'a') as f:
         f.write(str(msg) + '\n')
 
-url = 'http://localhost:8000/api/groups/'
+url = 'http://87.106.96.173/api/groups/'
 data = json.dumps({'name': 'TestGroup', 'pin': '1234'}).encode('utf-8')
 req = urllib.request.Request(url, data=data, headers={'Content-Type': 'application/json'})
 
