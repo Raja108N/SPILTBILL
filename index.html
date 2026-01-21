@@ -1,13 +1,47 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpiltBill</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpiltBill</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: 'var(--color-bg)',
+            surface: 'var(--color-surface)',
+            'surface-hover': 'var(--color-surface-hover)',
+            primary: 'var(--color-primary)',
+            'primary-dim': 'var(--color-primary-dim)',
+            accent: 'var(--color-accent)',
+            text: 'var(--color-text)',
+            muted: 'var(--color-text-muted)',
+            border: 'var(--color-border)',
+            danger: 'var(--color-danger)',
+            success: 'var(--color-success)',
+          },
+          borderRadius: {
+            md: 'var(--radius-md)',
+            lg: 'var(--radius-lg)',
+            full: 'var(--radius-full)',
+          },
+          boxShadow: {
+            glow: 'var(--shadow-glow)',
+            'glow-accent': 'var(--shadow-glow-accent)',
+          },
+        }
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

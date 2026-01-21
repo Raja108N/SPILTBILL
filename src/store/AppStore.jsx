@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { createContext, useContext, useReducer } from 'react';
+import { createContext, useContext, useEffect, useReducer } from 'react';
 
 const API_URL = 'http://localhost:8000/api';
 
@@ -9,6 +9,7 @@ const initialState = {
     profiles: [],
     currentProfile: null,
     currentMemberId: null, // Track which member is logged in
+    is_admin: false,
     balances: {},
     settlements: [],
     isLoading: false,
@@ -50,7 +51,38 @@ const reducer = (state, action) => {
 };
 
 export const AppProvider = ({ children }) => {
-    const [state, dispatch] = useReducer(reducer, { ...initialState, is_admin: false });
+    const [state, dispatch] = useReducer(reducer, initialState, (initial) => {
+        try {
+            const stored = localStorage.getItem('spiltbill_session');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                return {
+                    ...initial,
+                    currentProfile: parsed.currentProfile,
+                    currentMemberId: parsed.currentMemberId,
+                    is_admin: parsed.is_admin || false
+                };
+            }
+        } catch (e) {
+            console.error("Failed to recover session", e);
+        }
+        return initial;
+    });
+
+    useEffect(() => {
+        if (state.currentProfile) {
+            localStorage.setItem('spiltbill_session', JSON.stringify({
+                currentProfile: state.currentProfile,
+                currentMemberId: state.currentMemberId,
+                is_admin: state.is_admin
+            }));
+            // Optional: Refresh data on load (stale-while-revalidate)
+            // But we can't call actions.refreshProfile here easily because actions depend on dispatch
+        } else {
+            // If logged out (currentProfile is null), clear storage
+            localStorage.removeItem('spiltbill_session');
+        }
+    }, [state.currentProfile, state.currentMemberId, state.is_admin]);
 
     // ... (createProfile, joinGroup, addMember, addReceipt remain same)
 
@@ -211,7 +243,7 @@ export const AppProvider = ({ children }) => {
             dispatch,
             currentProfile: state.currentProfile,
             currentMemberId: state.currentMemberId,
-            actions: { createProfile, joinGroup, addMember, addReceipt, refreshProfile, getGroupDetails, updateGroupId, fetchSettlements, fetchBalances }
+            actions: { createProfile, joinGroup, addMember, addReceipt, refreshProfile, getGroupDetails, updateGroupId, fetchSettlements, fetchBalances, logout: () => dispatch({ type: 'LOGOUT' }) }
         }}>
             {children}
         </AppContext.Provider>

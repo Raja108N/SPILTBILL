@@ -1,23 +1,37 @@
 :root {
-  /* Premium Color Palette */
-  --color-bg: #050505;
-  --color-surface: #121212;
-  --color-surface-hover: #1e1e1e;
-  --color-surface-glass: rgba(18, 18, 18, 0.7);
-  --color-primary: #ccff00;
-  /* Neon Lime */
-  --color-primary-dim: #aacc00;
-  --color-primary-glow: rgba(204, 255, 0, 0.4);
-  --color-accent: #00ccff;
-  /* Cyan */
-  --color-text: #ffffff;
-  --color-text-muted: #a1a1a1;
-  --color-border: #2a2a2a;
-  --color-danger: #ff4444;
-  --color-success: #00cc66;
+  /* Purple Brand Palette */
+  --color-bg: #ffffff;
+
+  /* Glass Surface Colors */
+  --color-surface: #ffffff;
+  --color-surface-glass: rgba(255, 255, 255, 0.8);
+  --color-surface-glass-heavy: rgba(255, 255, 255, 0.95);
+
+  --color-primary: #7C3AED;
+  /* Violet 600 - Dynamic Purple */
+  --color-primary-dim: #6D28D9;
+  /* Violet 700 */
+  --color-primary-glow: rgba(124, 58, 237, 0.4);
+
+  --color-accent: #A78BFA;
+  /* Violet 400 */
+  --color-accent-glow: rgba(167, 139, 250, 0.4);
+
+  --color-text: #111827;
+  /* Gray 900 */
+  --color-text-muted: #6B7280;
+  /* Gray 500 */
+
+  --color-border: #E5E7EB;
+  /* Gray 200 */
+  --color-border-hover: #D1D5DB;
+  --color-separator: rgba(0, 0, 0, 0.1);
+
+  --color-danger: #EF4444;
+  --color-success: #10B981;
 
   /* Typography */
-  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -27,26 +41,40 @@
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
 
+  /* Safe Area */
+  --safe-area-bottom: env(safe-area-inset-bottom, 24px);
+
   /* Radius */
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
-  --shadow-glow: 0 0 30px var(--color-primary-glow);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-glass: 0 8px 32px 0 rgba(124, 58, 237, 0.05);
+  --shadow-glow: 0 8px 24px var(--color-primary-glow);
+  --shadow-glow-accent: 0 8px 24px var(--color-accent-glow);
 }
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   margin: 0;
   background-color: var(--color-bg);
+  /* Subtle mesh gradient background for Purple Theme */
+  background-image:
+    radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(167, 139, 250, 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(109, 40, 217, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
+  background-size: cover;
+
   color: var(--color-text);
   font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
@@ -60,88 +88,132 @@ body {
   flex-direction: column;
 }
 
-/* Utilities */
+/* Glassmorphism Utilities */
 .glass-panel {
   background: var(--color-surface-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(25px) saturate(180%);
+  -webkit-backdrop-filter: blur(25px) saturate(180%);
+  /* Safari support */
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  /* Visible border for white-on-white */
+  border-radius: var(--radius-lg);
+  /* Larger radius for iOS feel */
+  box-shadow: var(--shadow-glass);
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s ease;
 }
 
-.glass-panel-hover:hover {
-  background: rgba(30, 30, 30, 0.8);
-  border-color: rgba(255, 255, 255, 0.1);
+.glass-panel-heavy {
+  background: var(--color-surface-glass-heavy);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  /* Subtle shadow for bottom sheets */
 }
 
-.btn-primary {
-  background: var(--color-primary);
-  color: #000;
-  border: none;
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-full);
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(204, 255, 0, 0.2);
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(204, 255, 0, 0.3);
-}
-
-.btn-primary:active {
+/* Interactive States */
+.glass-panel-hover:active {
   transform: scale(0.98);
 }
 
+@media (min-width: 768px) {
+  .glass-panel-hover:hover {
+    background: rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Typography Utilities */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dim) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* iOS Style Buttons */
+.btn-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+  border: none;
+  padding: 18px 24px;
+  /* Taller touch targets */
+  border-radius: var(--radius-md);
+  /* 20px roughly matches Apple buttons */
+  font-weight: 600;
+  font-size: 1.05rem;
+  /* 17px approx */
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  box-shadow: 0 4px 12px var(--color-primary-glow);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
 .btn-secondary {
-  background: transparent;
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  padding: var(--spacing-md) var(--spacing-lg);
-  border-radius: var(--radius-full);
-  font-weight: 500;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  color: var(--color-primary);
+  /* Apple style link color */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 18px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-secondary:hover {
-  background: var(--color-surface-hover);
-  border-color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.8);
 }
 
+.btn-secondary:active {
+  transform: scale(0.96);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Inputs - iOS TextField Style */
 .input-field {
   width: 100%;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.6);
+  /* Slightly transprent */
+  backdrop-filter: blur(10px);
+  border: 1px solid transparent;
+  /* No border usually, just bg */
   color: var(--color-text);
-  padding: var(--spacing-md);
-  border-radius: var(--radius-md);
-  font-size: 1rem;
-  transition: border-color 0.2s;
+  padding: 18px;
+  border-radius: 16px;
+  /* slightly smaller than glass panels */
+  font-size: 1.05rem;
+  transition: all 0.2s ease;
   outline: none;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.01);
 }
 
 .input-field:focus {
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(204, 255, 0, 0.1);
 }
 
-/* Layout Utilities */
-.container-responsive {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-md);
-}
-
-@media (min-width: 768px) {
-  .container-responsive {
-    padding: 0 var(--spacing-xl);
-  }
+.input-field::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.6;
 }
 
 /* Animations */
@@ -157,6 +229,75 @@ body {
   }
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  /* "Spring" easing */
+}
+
+/* Utilities */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0px;
+  /* Hide scrollbars for cleaner 'mobile' look, rely on native touch scroll */
+  background: transparent;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Floating Animation for Background Blobs */
+@keyframes float {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-float {
+  animation: float 20s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float 25s ease-in-out infinite reverse;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
 }

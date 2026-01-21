@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowRight, ArrowUpRight, Check, ChevronRight, Copy, Edit2, LogOut, Plus, RefreshCw, Users, Wallet, X } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, Banknote, Check, ChevronRight, Copy, Edit2, Home, LogOut, Plus, RefreshCw, Users, Wallet, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '../store/AppStore';
 import AddReceipt from './AddReceipt';
@@ -7,7 +7,7 @@ import Settle from './Settle';
 
 const Dashboard = () => {
     const { state, currentProfile, dispatch, actions } = useAppStore();
-    const [view, setView] = useState('dashboard'); // dashboard, add-receipt, settle, add-member, member-gallery
+    const [view, setView] = useState('dashboard'); // dashboard, add-receipt, settle, members, member-gallery
     const [selectedMemberForGallery, setSelectedMemberForGallery] = useState(null);
     const [newMemberName, setNewMemberName] = useState('');
     const [isEditingId, setIsEditingId] = useState(false);
@@ -37,12 +37,12 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (currentProfile?.id) {
-            actions.fetchBalances();
-            actions.fetchSettlements();
+            actions.refreshProfile();
         }
     }, [currentProfile?.id]);
 
     const nets = state.balances || {};
+    const settlements = state.settlements || [];
 
     const memberTotals = useMemo(() => {
         if (!currentProfile) return {};
@@ -57,255 +57,250 @@ const Dashboard = () => {
         return totals;
     }, [currentProfile]);
 
-
-
-    const settlements = state.settlements || [];
-
     const handleAddMember = (e) => {
         e.preventDefault();
         if (newMemberName.trim()) {
             actions.addMember(newMemberName);
             setNewMemberName('');
-            setView('dashboard');
+            // stay on members view
         }
     };
 
-    if (view === 'add-receipt') {
-        return (
-            <div className="h-full flex flex-col animate-fade-in">
-                <div className="flex-none p-4 md:p-6">
-                    <button onClick={() => setView('dashboard')} className="btn-secondary text-sm flex items-center gap-2">
-                        <ArrowDownLeft className="rotate-45" size={16} /> Back to Dashboard
-                    </button>
-                </div>
-                <div className="flex-1 overflow-y-auto px-4 pb-4">
-                    <div className="max-w-2xl mx-auto">
-                        <AddReceipt onBack={() => setView('dashboard')} />
+    // --- Sub-Components/Views ---
+
+    const Header = () => (
+        <header className="flex-none p-4 pt-8 md:p-6 sticky top-0 bg-bg/80 backdrop-blur-md z-30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/50 md:border-none md:bg-transparent">
+            <div className="w-full md:w-auto">
+                <div className="flex items-center justify-between">
+                    <h1 className="text-3xl font-bold text-gradient mb-1 tracking-tight">{currentProfile.name}</h1>
+                    <div className="flex md:hidden items-center gap-3">
+                        <button onClick={actions.refreshProfile} className="p-2 bg-surface rounded-full border border-border shadow-sm text-muted" title="Refresh">
+                            <RefreshCw size={18} className={state.isLoading ? 'animate-spin text-primary' : ''} />
+                        </button>
+                        <button onClick={actions.logout} className="p-2 bg-surface rounded-full border border-border shadow-sm text-muted" title="Logout">
+                            <LogOut size={18} className="text-danger" />
+                        </button>
                     </div>
                 </div>
-            </div>
-        );
-    }
 
-    if (view === 'settle') {
-        return (
-            <div className="h-full flex flex-col animate-fade-in">
-                <div className="flex-none p-4 md:p-6">
-                    <button onClick={() => setView('dashboard')} className="btn-secondary text-sm flex items-center gap-2">
-                        <ArrowDownLeft className="rotate-45" size={16} /> Back to Dashboard
-                    </button>
-                </div>
-                <div className="flex-1 overflow-y-auto px-4 pb-4">
-                    <div className="max-w-2xl mx-auto">
-                        <Settle onBack={() => setView('dashboard')} settlements={settlements} />
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    if (view === 'member-gallery' && selectedMemberForGallery) {
-        return (
-            <MemberGallery
-                memberId={selectedMemberForGallery}
-                currentProfile={currentProfile}
-                onBack={() => setView('dashboard')}
-            />
-        );
-    }
-
-    return (
-        <div className="h-full flex flex-col animate-fade-in">
-            {/* Header */}
-            <header className="flex-none p-4 md:p-6 glass-panel m-4 md:m-6 mb-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 z-20">
-                <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-1">{currentProfile.name}</h1>
-                    <div className="flex items-center gap-3 text-sm text-muted">
-                        <div className="flex items-center gap-2 bg-surface/50 px-3 py-1 rounded-full border border-white/5">
-                            <span className="text-xs uppercase tracking-wider font-semibold">ID</span>
-                            {isEditingId ? (
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        className="bg-transparent border-b border-primary outline-none w-32 text-white font-mono"
-                                        value={newPublicId}
-                                        onChange={e => setNewPublicId(e.target.value)}
-                                        autoFocus
-                                    />
-                                    <button onClick={handleUpdateId} className="text-primary hover:text-primary-dim"><Check size={14} /></button>
-                                    <button onClick={() => setIsEditingId(false)} className="text-danger hover:text-danger/80"><X size={14} /></button>
-                                </div>
-                            ) : (
-                                <div className="flex items-center gap-2 group cursor-pointer" onClick={copyToClipboard} title="Click to copy">
-                                    <span className="font-mono tracking-wider text-white">{currentProfile.public_id}</span>
-                                    {copied ? <Check size={12} className="text-success" /> : <Copy size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />}
-                                </div>
-                            )}
-                        </div>
-
-                        {!isEditingId && state.is_admin && (
-                            <button
-                                onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }}
-                                className="p-1 hover:bg-white/10 rounded-full transition-colors"
-                                title="Edit Group ID"
-                            >
-                                <Edit2 size={14} />
-                            </button>
+                <div className="flex items-center gap-3 text-sm text-muted mt-2">
+                    <div className="flex items-center gap-2 bg-surface px-3 py-1.5 rounded-full border border-border shadow-sm backdrop-blur-sm">
+                        <span className="text-[10px] uppercase tracking-wider font-bold text-primary opacity-80">ID</span>
+                        {isEditingId ? (
+                            <div className="flex items-center gap-2">
+                                <input
+                                    className="bg-transparent border-b border-primary outline-none w-24 text-text font-mono"
+                                    value={newPublicId}
+                                    onChange={e => setNewPublicId(e.target.value)}
+                                    autoFocus
+                                />
+                                <button onClick={handleUpdateId} className="text-primary"><Check size={14} /></button>
+                                <button onClick={() => setIsEditingId(false)} className="text-danger"><X size={14} /></button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-2 group cursor-pointer" onClick={copyToClipboard}>
+                                <span className="font-mono tracking-wider text-text">{currentProfile.public_id}</span>
+                                {copied ? <Check size={12} className="text-success" /> : <Copy size={12} className="opacity-50 group-hover:opacity-100" />}
+                            </div>
                         )}
-                        {editError && <span className="text-danger text-xs">{editError}</span>}
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-3 self-end md:self-auto">
-                    <button onClick={actions.refreshProfile} className="p-2 hover:bg-white/10 rounded-full transition-colors" title="Refresh">
-                        <RefreshCw size={20} className={state.isLoading ? 'animate-spin text-primary' : 'text-muted'} />
-                    </button>
-                    <button onClick={() => window.location.reload()} className="p-2 hover:bg-danger/10 text-muted hover:text-danger rounded-full transition-colors" title="Logout">
-                        <LogOut size={20} />
-                    </button>
-                </div>
-            </header>
-
-            {/* Main Content Grid */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
-
-                    {/* Left Column: Balances & Members */}
-                    <div className="lg:col-span-5 flex flex-col gap-6">
-                        {/* Balances Card */}
-                        <div className="glass-panel p-5 flex-1 flex flex-col">
-                            <div className="flex items-center justify-between mb-6">
-                                <div className="flex items-center gap-2">
-                                    <Users size={18} className="text-primary" />
-                                    <h2 className="text-lg font-semibold">Balances</h2>
-                                </div>
-                                <button
-                                    onClick={() => setView('settle')}
-                                    className="text-xs font-semibold bg-primary/10 text-primary px-3 py-1.5 rounded-full hover:bg-primary hover:text-black transition-all"
-                                >
-                                    Settle Up
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                                {currentProfile.members.map(member => {
-                                    const net = nets[member.id] || 0;
-                                    const isPositive = net > 0;
-                                    const isNegative = net < 0;
-
-                                    return (
-                                        <div key={member.id} className="p-3 rounded-xl bg-surface/50 border border-white/5 flex items-center justify-between group hover:bg-surface transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${isPositive ? 'bg-success/20 text-success' : isNegative ? 'bg-danger/20 text-danger' : 'bg-white/10 text-muted'}`}>
-                                                    {member.name.charAt(0).toUpperCase()}
-                                                </div>
-                                                <span className="font-medium">{member.name}</span>
-                                            </div>
-                                            <div className={`flex items-center gap-1 font-mono font-bold ${isPositive ? 'text-success' : isNegative ? 'text-danger' : 'text-muted'}`}>
-                                                {isPositive && <ArrowUpRight size={16} />}
-                                                {isNegative && <ArrowDownLeft size={16} />}
-                                                <span>{net === 0 ? '-' : `£${Math.abs(net).toFixed(2)}`}</span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-
-                                {view === 'add-member' ? (
-                                    <form onSubmit={handleAddMember} className="p-3 rounded-xl bg-surface/50 border border-primary/30 flex gap-2 animate-fade-in">
-                                        <input
-                                            autoFocus
-                                            type="text"
-                                            placeholder="New Member Name"
-                                            className="bg-transparent border-none outline-none text-white w-full text-sm"
-                                            value={newMemberName}
-                                            onChange={e => setNewMemberName(e.target.value)}
-                                        />
-                                        <button type="submit" className="text-primary font-bold text-sm">Add</button>
-                                        <button type="button" onClick={() => setView('dashboard')} className="text-muted hover:text-white"><X size={16} /></button>
-                                    </form>
-                                ) : (
-                                    <button
-                                        onClick={() => setView('add-member')}
-                                        className="w-full p-3 rounded-xl border border-dashed border-white/10 text-muted text-sm hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <Plus size={16} /> Add Member
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                        {/* Settlements Section */}
-                        <div className="glass-panel p-5 flex flex-col">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Check size={18} className="text-primary" />
-                                <h2 className="text-lg font-semibold">Settlements</h2>
-                            </div>
-                            <div className="space-y-3 max-h-60 overflow-y-auto custom-scrollbar">
-                                {settlements.length === 0 ? (
-                                    <p className="text-muted text-sm text-center py-4">All settled up!</p>
-                                ) : (
-                                    settlements.map((t, idx) => (
-                                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-surface/50 border border-white/5">
-                                            <div className="flex items-center gap-2 text-sm">
-                                                <span className="font-bold text-white">{currentProfile.members.find(m => m.id === t.from)?.name}</span>
-                                                <ArrowRight size={14} className="text-muted" />
-                                                <span className="font-bold text-white">{currentProfile.members.find(m => m.id === t.to)?.name}</span>
-                                            </div>
-                                            <span className="font-mono font-bold text-primary">£{t.amount.toFixed(2)}</span>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
                     </div>
 
-                    {/* Right Column: Amount Spent Summary */}
-                    <div className="lg:col-span-7 flex flex-col h-full min-h-[400px]">
-                        <div className="glass-panel p-5 flex-1 flex flex-col relative overflow-hidden">
-                            <div className="flex items-center gap-2 mb-6 z-10">
-                                <Wallet size={18} className="text-accent" />
-                                <h2 className="text-lg font-semibold">Amount Spent</h2>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar z-10 pb-20">
-                                {currentProfile.members.map(member => {
-                                    const total = memberTotals[member.id] || 0;
-                                    return (
-                                        <button
-                                            key={member.id}
-                                            onClick={() => { setSelectedMemberForGallery(member.id); setView('member-gallery'); }}
-                                            className="w-full p-4 rounded-xl bg-surface/50 border border-white/5 flex items-center justify-between hover:bg-surface transition-all group hover:border-accent/30 hover:shadow-glow text-left"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-full bg-surface flex items-center justify-center text-lg font-bold text-muted group-hover:text-white transition-colors border border-white/5">
-                                                    {member.name.charAt(0).toUpperCase()}
-                                                </div>
-                                                <div>
-                                                    <span className="block font-semibold text-lg text-white group-hover:text-accent transition-colors">{member.name}</span>
-                                                    <span className="text-sm text-muted">Click for details</span>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <span className="text-2xl font-bold font-mono text-white">£{total.toFixed(2)}</span>
-                                                <ChevronRight size={20} className="text-muted group-hover:text-accent transition-colors" />
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            {/* Floating Add Button (Desktop: Bottom Right of this panel, Mobile: Fixed) */}
-                            <div className="absolute bottom-6 right-6 z-20">
-                                <button
-                                    onClick={() => setView('add-receipt')}
-                                    className="h-14 px-6 rounded-full bg-primary text-black font-bold shadow-glow flex items-center gap-2 hover:scale-105 transition-transform"
-                                >
-                                    <Plus size={24} />
-                                    <span className="hidden md:inline">Add Expense</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                    {!isEditingId && state.is_admin && (
+                        <button onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }} className="p-1 opacity-50 hover:opacity-100">
+                            <Edit2 size={14} />
+                        </button>
+                    )}
                 </div>
             </div>
+
+            <div className="hidden md:flex items-center gap-3">
+                <button onClick={actions.refreshProfile} className="p-2 hover:bg-surface-hover rounded-full transition-colors" title="Refresh">
+                    <RefreshCw size={20} className={state.isLoading ? 'animate-spin text-primary' : 'text-muted'} />
+                </button>
+                <button onClick={actions.logout} className="p-2 hover:bg-danger/10 text-muted hover:text-danger rounded-full transition-colors" title="Logout">
+                    <LogOut size={20} />
+                </button>
+            </div>
+        </header>
+    );
+
+    const BalancesList = () => (
+        <div className="space-y-3">
+            {currentProfile.members.map(member => {
+                const net = nets[member.id] || 0;
+                const isPositive = net > 0;
+                const isNegative = net < 0;
+
+                return (
+                    <div key={member.id} className="p-4 rounded-3xl bg-surface border border-border flex items-center justify-between group md:hover:bg-surface-hover transition-colors shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-inner ${isPositive ? 'bg-success/10 text-success' : isNegative ? 'bg-danger/10 text-danger' : 'bg-surface-hover border border-border text-muted'}`}>
+                                {member.name.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="font-medium text-lg text-text">{member.name}</span>
+                        </div>
+                        <div className={`flex items-center gap-1 font-mono font-bold text-lg ${isPositive ? 'text-success' : isNegative ? 'text-danger' : 'text-muted'}`}>
+                            {isPositive && <ArrowUpRight size={18} />}
+                            {isNegative && <ArrowDownLeft size={18} />}
+                            <span>{net === 0 ? '-' : `£${Math.abs(net).toFixed(2)}`}</span>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+
+    const MembersView = () => (
+        <div className="p-4 space-y-4 pb-32 animate-fade-in">
+            <h2 className="text-xl font-bold mb-4 text-text">Group Members</h2>
+            <form onSubmit={handleAddMember} className="p-4 rounded-3xl bg-surface border border-primary/20 flex gap-3 mb-6 shadow-glow">
+                <input
+                    type="text"
+                    placeholder="Add new member..."
+                    className="bg-transparent border-none outline-none text-text w-full placeholder-muted/50"
+                    value={newMemberName}
+                    onChange={e => setNewMemberName(e.target.value)}
+                />
+                <button type="submit" className="bg-primary text-white rounded-xl p-2 px-4 font-bold text-sm shadow-md">Add</button>
+            </form>
+
+            <div className="space-y-3">
+                {currentProfile.members.map(member => (
+                    <div key={member.id} onClick={() => { setSelectedMemberForGallery(member.id); setView('member-gallery'); }} className="p-4 rounded-3xl bg-surface border border-border flex items-center justify-between active:scale-98 transition-transform shadow-sm">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-full bg-surface-hover border border-border flex items-center justify-center text-lg font-bold text-primary">
+                                {member.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <span className="block font-semibold text-lg text-text">{member.name}</span>
+                                <span className="text-sm text-primary font-medium">Spent: £{(memberTotals[member.id] || 0).toFixed(2)}</span>
+                            </div>
+                        </div>
+                        <ChevronRight size={20} className="text-muted" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+
+    // --- Main Rendering Logic ---
+
+    // 1. Full Screen Views (Overlays)
+    if (view === 'add-receipt') return <AddReceipt onBack={() => setView('dashboard')} />;
+    if (view === 'settle') return (
+        <Settle
+            onBack={() => setView('dashboard')}
+            settlements={settlements}
+        />
+    );
+    if (view === 'member-gallery' && selectedMemberForGallery) return (
+        <MemberGallery
+            memberId={selectedMemberForGallery}
+            currentProfile={currentProfile}
+            onBack={() => setView('members')}
+        />
+    );
+
+    // 2. Dashboard View (with Bottom Nav integration on Mobile)
+    return (
+        <div className="h-full flex flex-col animate-fade-in md:p-6 max-w-[1200px] mx-auto w-full">
+            <Header />
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto pb-28 md:pb-0 px-4 md:px-0 custom-scrollbar">
+
+                {/* Mobile View Switcher within Content Area */}
+                {view === 'members' ? (
+                    <MembersView />
+                ) : (
+                    // Default Dashboard View
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4 md:mt-0">
+
+                        {/* Balances Section */}
+                        <div className="lg:col-span-12 xl:col-span-5">
+                            <div className="glass-panel p-5 flex flex-col gap-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-primary/10 rounded-xl text-primary"><Users size={20} /></div>
+                                        <h2 className="text-lg font-semibold text-text">Balances</h2>
+                                    </div>
+                                    <button
+                                        onClick={() => setView('settle')}
+                                        className="text-xs font-bold bg-surface hover:bg-surface-hover text-text px-4 py-2 rounded-full border border-border transition-all flex items-center gap-2 shadow-sm"
+                                    >
+                                        <Banknote size={14} className="text-primary" /> Settle Up
+                                    </button>
+                                </div>
+                                <BalancesList />
+                                <div className="md:hidden">
+                                    {/* Mobile-only hint */}
+                                    <p className="text-center text-xs text-muted">Tap 'Settle Up' to clear debts.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity / Spending Summary */}
+                        <div className="lg:col-span-12 xl:col-span-7">
+                            <div className="glass-panel p-5 min-h-[300px]">
+                                <div className="flex items-center gap-2 mb-6">
+                                    <div className="p-2 bg-accent/10 rounded-xl text-accent"><Wallet size={20} /></div>
+                                    <h2 className="text-lg font-semibold text-text">Spending Summary</h2>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {currentProfile.members.map(member => (
+                                        <div key={member.id} className="p-4 rounded-3xl bg-surface border border-border flex flex-col gap-1 shadow-sm">
+                                            <span className="text-muted text-sm font-medium">{member.name}</span>
+                                            <span className="text-2xl font-mono text-text">£{(memberTotals[member.id] || 0).toFixed(2)}</span>
+                                            <div className="w-full bg-surface-hover h-2 rounded-full mt-2 overflow-hidden">
+                                                <div className="bg-gradient-to-r from-accent to-primary h-full rounded-full" style={{ width: `${Math.min(((memberTotals[member.id] || 0) / 1000) * 100, 100)}%` }}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop FAB (Hidden on Mobile, replaced by Bottom Nav FAB) */}
+            <div className="hidden md:block fixed bottom-8 right-8 z-50">
+                <button
+                    onClick={() => setView('add-receipt')}
+                    className="h-16 px-8 rounded-full bg-primary text-white font-extrabold shadow-glow flex items-center gap-3 hover:scale-105 transition-transform text-lg"
+                >
+                    <Plus size={24} /> Add Expense
+                </button>
+            </div>
+
+            {/* Mobile Bottom Navigation & FAB */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 h-[90px] glass-panel-heavy rounded-t-[32px] rounded-b-none flex items-start justify-between px-10 pt-3 shadow-[0_-5px_30px_rgba(0,0,0,0.05)] z-40 border-t border-white/40 pb-[env(safe-area-inset-bottom,20px)]">
+                <button
+                    onClick={() => setView('dashboard')}
+                    className={`flex flex-col items-center justify-center gap-1 transition-all mt-1 ${view === 'dashboard' ? 'text-primary transform scale-105 font-bold' : 'text-muted hover:text-text'}`}
+                >
+                    <Home size={26} className={view === 'dashboard' ? 'fill-primary/20 stroke-[2.5px]' : 'stroke-2'} />
+                    <span className="text-[10px] font-medium">Home</span>
+                </button>
+
+                <div className="relative -top-10">
+                    <button
+                        onClick={() => setView('add-receipt')}
+                        className="w-[72px] h-[72px] p-4 rounded-full bg-primary text-white shadow-glow-accent flex items-center justify-center transition-transform active:scale-95 border-[6px] border-bg hover:shadow-glow hover:-translate-y-1"
+                    >
+                        <Plus size={32} strokeWidth={3} />
+                    </button>
+                </div>
+
+                <button
+                    onClick={() => setView('members')}
+                    className={`flex flex-col items-center justify-center gap-1 transition-all mt-1 ${view === 'members' ? 'text-primary transform scale-105 font-bold' : 'text-muted hover:text-text'}`}
+                >
+                    <Users size={26} className={view === 'members' ? 'fill-primary/20 stroke-[2.5px]' : 'stroke-2'} />
+                    <span className="text-[10px] font-medium">Members</span>
+                </button>
+            </div>
+
         </div>
     );
 };
