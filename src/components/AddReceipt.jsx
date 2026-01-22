@@ -80,7 +80,7 @@ const AddReceipt = ({ onBack }) => {
                 maxSizeMB: 0.5,
                 maxWidthOrHeight: 1600,
                 useWebWorker: true,
-                fileType: "image/webp",
+                fileType: "image/jpeg",
                 initialQuality: 0.8
             };
             const compressedFile = await imageCompression(file, options);
@@ -117,11 +117,11 @@ const AddReceipt = ({ onBack }) => {
 
             canvas.toBlob((blob) => {
                 if (blob) {
-                    const file = new File([blob], "camera_capture.webp", { type: "image/webp" });
+                    const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
                     handleCompressAndSet(file);
                     stopCamera();
                 }
-            }, 'image/webp', 0.9);
+            }, 'image/jpeg', 0.9);
         }
     };
 

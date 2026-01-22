@@ -167,13 +167,14 @@ export const AppProvider = ({ children }) => {
 
             if (imageFile) {
                 const imageForm = new FormData();
-                imageForm.append('image', imageFile);
+                // Ensure a filename is present for the backend to treat it as a file
+                imageForm.append('image', imageFile, 'receipt.jpg');
                 await axios.patch(`${API_URL}/receipts/${receiptRes.data.id}/`, imageForm);
             }
 
             refreshProfile();
         } catch (e) {
-            console.error(e);
+            console.error("Add Receipt Error:", e.response?.data || e.message);
         }
     };
 
