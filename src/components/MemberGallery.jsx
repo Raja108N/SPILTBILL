@@ -46,7 +46,7 @@ const MemberGallery = ({ memberId, onBack, currentProfile }) => {
                                 {/* Image / Placeholder */}
                                 <div className="h-48 bg-surface-hover relative overflow-hidden border-b border-border">
                                     {receipt.image ? (
-                                        <img src={receipt.image?.replace('http://87.106.96.173', '')} alt={receipt.description} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                        <img src={receipt.image?.replace(/^(?:https?:)?\/\/[^/]+/, '')} alt={receipt.description} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-surface-hover">
                                             <Receipt size={48} className="text-muted/30 group-hover:text-primary transition-colors" />

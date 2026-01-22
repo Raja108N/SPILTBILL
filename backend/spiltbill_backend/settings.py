@@ -7,7 +7,11 @@ SECRET_KEY = 'django-insecure-change-me-in-production'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['87.106.96.173', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['87.106.96.173', 'localhost', '127.0.0.1', 'spiltbill.netlify.app']
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
