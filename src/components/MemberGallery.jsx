@@ -60,7 +60,7 @@ const MemberGallery = ({ memberId, onBack, currentProfile, onEdit }) => {
 
                                     {/* Action Buttons (Only for Owner) */}
                                     {isOwnReceipt && (
-                                        <div className="absolute top-2 right-2 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="absolute top-2 right-2 z-20 flex gap-2">
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); onEdit(receipt); }}
                                                 className="p-2 bg-black/50 text-white rounded-full hover:bg-primary transition-colors backdrop-blur-sm"
