@@ -305,31 +305,31 @@ const Dashboard = () => {
                 </button>
             </div>
 
-            {/* Mobile Bottom Navigation & FAB */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 h-[90px] glass-panel-heavy rounded-t-[32px] rounded-b-none flex items-start justify-between px-10 pt-3 shadow-[0_-5px_30px_rgba(0,0,0,0.05)] z-40 border-t border-white/40 pb-[env(safe-area-inset-bottom,20px)]">
+            {/* Mobile Bottom Navigation & FAB - Floating */}
+            <div className="md:hidden fixed bottom-6 left-5 right-5 h-[72px] glass-panel-heavy rounded-full flex items-center justify-between px-8 shadow-[0_10px_40px_rgba(0,0,0,0.1)] z-50 border border-white/40">
                 <button
                     onClick={() => setView('dashboard')}
-                    className={`flex flex-col items-center justify-center gap-1 transition-all mt-1 ${view === 'dashboard' ? 'text-primary transform scale-105 font-bold' : 'text-muted hover:text-text'}`}
+                    className={`flex flex-col items-center justify-center gap-0.5 transition-all ${view === 'dashboard' ? 'text-primary transform scale-105 font-bold' : 'text-muted/80 hover:text-text'}`}
                 >
-                    <Home size={26} className={view === 'dashboard' ? 'fill-primary/20 stroke-[2.5px]' : 'stroke-2'} />
-                    <span className="text-[10px] font-medium">Home</span>
+                    <Home size={24} className={view === 'dashboard' ? 'fill-primary/20 stroke-[2.5px]' : 'stroke-2'} />
+                    <span className="text-[9px] font-medium">Home</span>
                 </button>
 
-                <div className="relative -top-10">
+                <div className="relative -top-8">
                     <button
                         onClick={() => setView('add-receipt')}
-                        className="w-[72px] h-[72px] p-4 rounded-full bg-primary text-white shadow-glow-accent flex items-center justify-center transition-transform active:scale-95 border-[6px] border-bg hover:shadow-glow hover:-translate-y-1"
+                        className="w-[64px] h-[64px] p-4 rounded-full bg-gradient-to-br from-primary to-accent text-white shadow-glow-accent flex items-center justify-center transition-transform active:scale-95 border-[5px] border-[#f2f4f6]"
                     >
-                        <Plus size={32} strokeWidth={3} />
+                        <Plus size={28} strokeWidth={3} />
                     </button>
                 </div>
 
                 <button
                     onClick={() => setView('members')}
-                    className={`flex flex-col items-center justify-center gap-1 transition-all mt-1 ${view === 'members' ? 'text-primary transform scale-105 font-bold' : 'text-muted hover:text-text'}`}
+                    className={`flex flex-col items-center justify-center gap-0.5 transition-all ${view === 'members' ? 'text-primary transform scale-105 font-bold' : 'text-muted/80 hover:text-text'}`}
                 >
-                    <Users size={26} className={view === 'members' ? 'fill-primary/20 stroke-[2.5px]' : 'stroke-2'} />
-                    <span className="text-[10px] font-medium">Members</span>
+                    <Users size={24} className={view === 'members' ? 'fill-primary/20 stroke-[2.5px]' : 'stroke-2'} />
+                    <span className="text-[9px] font-medium">Members</span>
                 </button>
             </div>
 
