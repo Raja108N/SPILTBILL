@@ -168,9 +168,7 @@ export const AppProvider = ({ children }) => {
             if (imageFile) {
                 const imageForm = new FormData();
                 imageForm.append('image', imageFile);
-                await axios.patch(`${API_URL}/receipts/${receiptRes.data.id}/`, imageForm, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await axios.patch(`${API_URL}/receipts/${receiptRes.data.id}/`, imageForm);
             }
 
             refreshProfile();
