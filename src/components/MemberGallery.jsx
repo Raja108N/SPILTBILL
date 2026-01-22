@@ -1,4 +1,4 @@
-import { ArrowLeft, Clock, Receipt, X, ZoomIn } from 'lucide-react';
+import { ArrowLeft, Clock, Edit2, Receipt, Trash2, X, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useAppStore } from '../store/AppStore';
