@@ -97,48 +97,51 @@ const Dashboard = () => {
                     <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 overflow-hidden">
                             {/* Premium Main Pill */}
-                            <div className="flex-1 min-w-0">
-                                <div className="relative bg-gradient-to-br from-white to-white/90 border border-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] px-4 py-2 rounded-2xl flex items-center gap-3 group transition-all hover:shadow-md w-full sm:w-auto overflow-hidden">
-                                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-primary shrink-0">
-                                        <Home size={16} strokeWidth={2.5} />
-                                    </div>
-                                    <h1 className="text-lg font-black text-gray-900 tracking-tight leading-none truncate">{currentProfile.name}</h1>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2 shrink-0">
-                                {/* ID Badge - Minimal */}
-                                {!isEditingId && (
-                                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/40 border border-white/20 hover:bg-white/60 transition-all cursor-pointer group/id" onClick={copyToClipboard}>
-                                        <span className="text-[9px] uppercase font-bold text-muted/60 leading-none">ID</span>
-                                        <span className="font-mono text-xs text-text font-bold tracking-wider">{currentProfile.public_id}</span>
-                                        {copied ? <Check size={10} className="text-success" /> : <Copy size={10} className="text-muted opacity-0 group-hover/id:opacity-100 transition-opacity" />}
-                                    </div>
-                                )}
-
-                                {/* Actions Pill */}
-                                <div>
-                                    {isEditingId ? (
-                                        <div className="flex items-center gap-1 bg-surface/80 p-1 rounded-full border border-primary/20 animate-scale-in">
-                                            <input
-                                                className="bg-transparent border-none outline-none w-20 text-xs text-center font-mono"
-                                                value={newPublicId}
-                                                onChange={e => setNewPublicId(e.target.value)}
-                                                autoFocus
-                                            />
-                                            <button onClick={handleUpdateId} className="p-1.5 rounded-full bg-primary text-white shadow-sm"><Check size={12} /></button>
-                                            <button onClick={() => setIsEditingId(false)} className="p-1.5 rounded-full hover:bg-danger/10 text-danger"><X size={12} /></button>
+                            <div className="relative flex items-center justify-between gap-3 mt-1 sm:mt-0">
+                                {/* Group Name Pill */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="relative bg-gradient-to-br from-white to-white/90 border border-white shadow-[0_2px_12px_rgba(0,0,0,0.04)] px-4 py-2 rounded-2xl flex items-center gap-3 group transition-all hover:shadow-md w-full sm:w-auto overflow-hidden">
+                                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-primary shrink-0">
+                                            <Home size={16} strokeWidth={2.5} />
                                         </div>
-                                    ) : (
-                                        <div className="flex items-center gap-0.5 bg-white/50 p-1 rounded-full border border-white/30 backdrop-blur-md shadow-sm">
-                                            {state.is_admin && (
-                                                <button onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }} className="p-2 text-muted/70 hover:text-text hover:bg-white rounded-full transition-all" title="Edit ID"><Edit2 size={16} strokeWidth={2} /></button>
-                                            )}
-                                            <button onClick={actions.refreshProfile} className="p-2 text-muted/70 hover:text-primary hover:bg-white rounded-full transition-all"><RefreshCw size={16} strokeWidth={2} className={state.isLoading ? 'animate-spin' : ''} /></button>
-                                            <div className="w-px h-4 bg-muted/20 mx-0.5"></div>
-                                            <button onClick={actions.logout} className="p-2 text-muted/70 hover:text-danger hover:bg-white rounded-full transition-all"><LogOut size={16} strokeWidth={2} /></button>
+                                        <h1 className="text-lg font-black text-gray-900 tracking-tight leading-none truncate">{currentProfile.name}</h1>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    {/* ID Badge - Absolute Top-Right on Mobile, Inline on Desktop */}
+                                    {!isEditingId && (
+                                        <div className="absolute -top-9 right-0 sm:static sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/40 border border-white/20 hover:bg-white/60 transition-all cursor-pointer group/id" onClick={copyToClipboard}>
+                                            <span className="text-[9px] uppercase font-bold text-muted/60 leading-none">ID</span>
+                                            <span className="font-mono text-xs text-text font-bold tracking-wider">{currentProfile.public_id}</span>
+                                            {copied ? <Check size={10} className="text-success" /> : <Copy size={10} className="text-muted opacity-0 group-hover/id:opacity-100 transition-opacity" />}
                                         </div>
                                     )}
+
+                                    {/* Actions Pill */}
+                                    <div>
+                                        {isEditingId ? (
+                                            <div className="flex items-center gap-1 bg-surface/80 p-1 rounded-full border border-primary/20 animate-scale-in">
+                                                <input
+                                                    className="bg-transparent border-none outline-none w-20 text-xs text-center font-mono"
+                                                    value={newPublicId}
+                                                    onChange={e => setNewPublicId(e.target.value)}
+                                                    autoFocus
+                                                />
+                                                <button onClick={handleUpdateId} className="p-1.5 rounded-full bg-primary text-white shadow-sm"><Check size={12} /></button>
+                                                <button onClick={() => setIsEditingId(false)} className="p-1.5 rounded-full hover:bg-danger/10 text-danger"><X size={12} /></button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-0.5 bg-white/50 p-1 rounded-full border border-white/30 backdrop-blur-md shadow-sm">
+                                                {state.is_admin && (
+                                                    <button onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }} className="p-2 text-muted/70 hover:text-text hover:bg-white rounded-full transition-all" title="Edit ID"><Edit2 size={16} strokeWidth={2} /></button>
+                                                )}
+                                                <button onClick={actions.refreshProfile} className="p-2 text-muted/70 hover:text-primary hover:bg-white rounded-full transition-all"><RefreshCw size={16} strokeWidth={2} className={state.isLoading ? 'animate-spin' : ''} /></button>
+                                                <div className="w-px h-4 bg-muted/20 mx-0.5"></div>
+                                                <button onClick={actions.logout} className="p-2 text-muted/70 hover:text-danger hover:bg-white rounded-full transition-all"><LogOut size={16} strokeWidth={2} /></button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
