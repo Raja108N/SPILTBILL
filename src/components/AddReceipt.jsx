@@ -142,6 +142,50 @@ const AddReceipt = ({ onBack }) => {
         onBack();
     };
 
+    if (isCameraOpen) {
+        return (
+            <div className="fixed inset-0 z-50 bg-black flex flex-col animate-fade-in">
+                {/* Hidden Canvas for Capture */}
+                <canvas ref={canvasRef} className="hidden" />
+
+                <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+
+                    {/* Overlay Guides */}
+                    <div className="absolute inset-8 border-2 border-white/20 rounded-xl pointer-events-none">
+                        <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-xl" />
+                        <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-xl" />
+                        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-xl" />
+                        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-xl" />
+                    </div>
+                </div>
+
+                <div className="h-32 bg-black/80 backdrop-blur-md flex items-center justify-around px-8 pb-4">
+                    <button
+                        onClick={stopCamera}
+                        className="p-4 rounded-full bg-surface/20 text-white hover:bg-surface/40 transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+
+                    <button
+                        onClick={capturePhoto}
+                        className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center active:scale-95 transition-transform"
+                    >
+                        <div className="w-16 h-16 bg-white rounded-full" />
+                    </button>
+
+                    <div className="w-12" /> {/* Spacer for balance */}
+                </div>
+            </div>
+        );
+    }
+
     if (step === 1) {
         return (
             <div className="flex flex-col h-full animate-fade-in pb-4 md:pb-0">
@@ -228,50 +272,6 @@ const AddReceipt = ({ onBack }) => {
                 >
                     Next <ArrowRight size={20} />
                 </button>
-            </div>
-        );
-    }
-
-    if (isCameraOpen) {
-        return (
-            <div className="fixed inset-0 z-50 bg-black flex flex-col animate-fade-in">
-                {/* Hidden Canvas for Capture */}
-                <canvas ref={canvasRef} className="hidden" />
-
-                <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
-                    <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        className="absolute inset-0 w-full h-full object-cover"
-                    />
-
-                    {/* Overlay Guides */}
-                    <div className="absolute inset-8 border-2 border-white/20 rounded-xl pointer-events-none">
-                        <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-xl" />
-                        <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-xl" />
-                        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-xl" />
-                        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-xl" />
-                    </div>
-                </div>
-
-                <div className="h-32 bg-black/80 backdrop-blur-md flex items-center justify-around px-8 pb-4">
-                    <button
-                        onClick={stopCamera}
-                        className="p-4 rounded-full bg-surface/20 text-white hover:bg-surface/40 transition-colors"
-                    >
-                        <X size={24} />
-                    </button>
-
-                    <button
-                        onClick={capturePhoto}
-                        className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center active:scale-95 transition-transform"
-                    >
-                        <div className="w-16 h-16 bg-white rounded-full" />
-                    </button>
-
-                    <div className="w-12" /> {/* Spacer for balance */}
-                </div>
             </div>
         );
     }
