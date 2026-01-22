@@ -3,3 +3,9 @@
   to = "http://87.106.96.173/api/:splat"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/media/*"
+  to = "http://87.106.96.173/media/:splat"
+  status = 200
+  force = true
