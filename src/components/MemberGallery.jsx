@@ -47,7 +47,7 @@ const MemberGallery = ({ memberId, onBack, currentProfile }) => {
                                 <div className="h-48 bg-surface-hover relative overflow-hidden border-b border-border">
                                     {receipt.image ? (
                                         <img
-                                            src={receipt.image.startsWith('http') ? receipt.image : `${import.meta.env.VITE_API_BASE_URL || ''}${receipt.image}`}
+                                            src={receipt.image?.replace(/^(?:https?:)?\/\/[^/]+/, '')}
                                             alt={receipt.description}
                                             className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                         />
