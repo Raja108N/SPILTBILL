@@ -1,7 +1,9 @@
-import { ArrowLeft, Clock, Receipt } from 'lucide-react';
+import { ArrowLeft, Clock, Receipt, X, ZoomIn } from 'lucide-react';
+import { useState } from 'react';
 
 const MemberGallery = ({ memberId, onBack, currentProfile }) => {
     const member = currentProfile.members.find(m => m.id === memberId);
+    const [zoomedImage, setZoomedImage] = useState(null);
 
     // Filter receipts paid by this member
     const memberReceipts = currentProfile.receipts.filter(r =>
@@ -11,7 +13,7 @@ const MemberGallery = ({ memberId, onBack, currentProfile }) => {
     const totalSpent = memberReceipts.reduce((sum, r) => sum + parseFloat(r.total), 0);
 
     return (
-        <div className="flex flex-col h-full animate-fade-in">
+        <div className="flex flex-col h-full animate-fade-in relative">
             {/* Header */}
             <div className="flex items-center justify-between p-4 md:p-6 mb-2">
                 <button onClick={onBack} className="btn-secondary text-sm flex items-center gap-2 group px-3 md:px-4">
@@ -42,21 +44,32 @@ const MemberGallery = ({ memberId, onBack, currentProfile }) => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {memberReceipts.map(receipt => (
-                            <div key={receipt.id} className="glass-panel group overflow-hidden hover:border-primary/50 transition-all hover:shadow-md bg-surface border-border">
+                            <div key={receipt.id} className="glass-panel group overflow-hidden bg-surface border-border hover:border-primary/50 transition-all hover:shadow-md">
                                 {/* Image / Placeholder */}
-                                <div className="h-48 bg-surface-hover relative overflow-hidden border-b border-border">
+                                <div
+                                    className={`h-48 bg-surface-hover relative overflow-hidden border-b border-border ${receipt.image ? 'cursor-zoom-in' : ''}`}
+                                    onClick={() => receipt.image && setZoomedImage(receipt.image)}
+                                >
                                     {receipt.image ? (
-                                        <img
-                                            src={receipt.image?.replace(/^(?:https?:)?\/\/[^/]+/, '')}
-                                            alt={receipt.description}
-                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                        />
+                                        <>
+                                            <img
+                                                src={receipt.image?.replace(/^(?:https?:)?\/\/[^/]+/, '')}
+                                                alt={receipt.description}
+                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                            />
+                                            {/* Hover Overlay with Zoom Icon */}
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                                <div className="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm">
+                                                    <ZoomIn size={24} />
+                                                </div>
+                                            </div>
+                                        </>
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center bg-surface-hover">
                                             <Receipt size={48} className="text-muted/30 group-hover:text-primary transition-colors" />
                                         </div>
                                     )}
-                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pointer-events-none">
                                         <span className="text-2xl font-bold font-mono text-white">£{parseFloat(receipt.total).toFixed(2)}</span>
                                     </div>
                                 </div>
@@ -81,6 +94,32 @@ const MemberGallery = ({ memberId, onBack, currentProfile }) => {
                     </div>
                 )}
             </div>
+
+            {/* Lightbox / Zoom Modal */}
+            {zoomedImage && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-fade-in p-4"
+                    onClick={() => setZoomedImage(null)}
+                >
+                    {/* Close Button */}
+                    <button
+                        onClick={() => setZoomedImage(null)}
+                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-60"
+                        title="Close Zoom"
+                    >
+                        <X size={32} />
+                    </button>
+
+                    {/* Image Container */}
+                    <div className="relative max-w-full max-h-full overflow-hidden rounded-xl shadow-2xl" onClick={e => e.stopPropagation()}>
+                        <img
+                            src={zoomedImage.replace(/^(?:https?:)?\/\/[^/]+/, '')}
+                            alt="Zoomed Receipt"
+                            className="max-w-full max-h-[90vh] object-contain select-none"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
