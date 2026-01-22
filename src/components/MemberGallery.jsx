@@ -1,6 +1,7 @@
 import { ArrowLeft, Clock, Receipt, X, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useAppStore } from '../store/AppStore';
 
 const MemberGallery = ({ memberId, onBack, currentProfile, onEdit }) => {
     const { actions, currentMemberId } = useAppStore();
