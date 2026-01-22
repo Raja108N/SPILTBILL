@@ -6,7 +6,7 @@ import { useAppStore } from '../store/AppStore';
 const MemberGallery = ({ memberId, onBack, currentProfile, onEdit }) => {
     const { actions, currentMemberId } = useAppStore();
     const member = currentProfile.members.find(m => m.id === memberId);
-    const [zoomedImage, setZoomedImage] = useState(null);
+    const [zoomedReceipt, setZoomedReceipt] = useState(null);
 
     // Filter receipts paid by this member
     const memberReceipts = currentProfile.receipts.filter(r =>
@@ -81,7 +81,7 @@ const MemberGallery = ({ memberId, onBack, currentProfile, onEdit }) => {
                                     {/* Image / Placeholder */}
                                     <div
                                         className={`h-48 bg-surface-hover relative overflow-hidden border-b border-border ${receipt.image ? 'cursor-zoom-in' : ''}`}
-                                        onClick={() => receipt.image && setZoomedImage(receipt.image)}
+                                        onClick={() => receipt.image && setZoomedReceipt(receipt)}
                                     >
                                         {receipt.image ? (
                                             <>
@@ -102,7 +102,8 @@ const MemberGallery = ({ memberId, onBack, currentProfile, onEdit }) => {
                                                 <Receipt size={48} className="text-muted/30 group-hover:text-primary transition-colors" />
                                             </div>
                                         )}
-                                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pointer-events-none">
+                                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 pointer-events-none">
+                                            <p className="text-white/90 text-sm font-medium truncate mb-0.5">{receipt.description}</p>
                                             <span className="text-2xl font-bold font-mono text-white">£{parseFloat(receipt.total).toFixed(2)}</span>
                                         </div>
                                     </div>
@@ -129,34 +130,41 @@ const MemberGallery = ({ memberId, onBack, currentProfile, onEdit }) => {
                 )}
             </div>
 
-            {/* Lightbox / Zoom Modal */}
             {/* Lightbox / Zoom Modal - Ported to body to escape transform stacking contexts */}
-            {zoomedImage && createPortal(
-                <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4"
-                    onClick={() => setZoomedImage(null)}
-                >
-                    {/* Close Button */}
-                    <button
-                        onClick={() => setZoomedImage(null)}
-                        className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-[110]"
-                        title="Close Zoom"
+            {
+                zoomedReceipt && createPortal(
+                    <div
+                        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4"
+                        onClick={() => setZoomedReceipt(null)}
                     >
-                        <X size={32} />
-                    </button>
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setZoomedReceipt(null)}
+                            className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-[110]"
+                            title="Close Zoom"
+                        >
+                            <X size={32} />
+                        </button>
 
-                    {/* Image Container */}
-                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden" onClick={e => e.stopPropagation()}>
-                        <img
-                            src={zoomedImage.replace(/^(?:https?:)?\/\/[^/]+/, '')}
-                            alt="Zoomed Receipt"
-                            className="max-w-full max-h-[90dvh] object-contain shadow-2xl rounded-lg select-none"
-                        />
-                    </div>
-                </div>,
-                document.body
-            )}
-        </div>
+                        {/* Image Container */}
+                        <div className="relative flex-1 w-full flex items-center justify-center overflow-hidden min-h-0" onClick={e => e.stopPropagation()}>
+                            <img
+                                src={zoomedReceipt.image?.replace(/^(?:https?:)?\/\/[^/]+/, '')}
+                                alt={zoomedReceipt.description || "Zoomed Receipt"}
+                                className="max-w-full max-h-full object-contain shadow-2xl rounded-lg select-none"
+                            />
+                        </div>
+
+                        {/* Description Caption */}
+                        <div className="mt-4 text-center max-w-2xl px-4 z-[110] animate-slide-up" onClick={e => e.stopPropagation()}>
+                            <h3 className="text-xl md:text-2xl font-bold text-white mb-1">{zoomedReceipt.description || 'Expense'}</h3>
+                            <p className="text-white/60 font-mono text-lg">£{parseFloat(zoomedReceipt.total).toFixed(2)}</p>
+                        </div>
+                    </div>,
+                    document.body
+                )
+            }
+        </div >
     );
 };
 
