@@ -185,10 +185,14 @@ const Dashboard = () => {
         </div>
     );
 
+    const [editingReceipt, setEditingReceipt] = useState(null);
+
     // --- Main Rendering Logic ---
 
     // 1. Full Screen Views (Overlays)
     if (view === 'add-receipt') return <AddReceipt onBack={() => setView('dashboard')} />;
+    if (view === 'edit-receipt') return <AddReceipt onBack={() => { setView('members'); setEditingReceipt(null); }} initialData={editingReceipt} />;
+
     if (view === 'settle') return (
         <Settle
             onBack={() => setView('dashboard')}
@@ -200,6 +204,10 @@ const Dashboard = () => {
             memberId={selectedMemberForGallery}
             currentProfile={currentProfile}
             onBack={() => setView('members')}
+            onEdit={(receipt) => {
+                setEditingReceipt(receipt);
+                setView('edit-receipt');
+            }}
         />
     );
 

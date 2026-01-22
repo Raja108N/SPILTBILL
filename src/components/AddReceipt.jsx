@@ -3,16 +3,16 @@ import { ArrowRight, Camera, Check, Image as ImageIcon, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '../store/AppStore';
 
-const AddReceipt = ({ onBack }) => {
+const AddReceipt = ({ onBack, initialData = null }) => {
     const { currentProfile, actions, currentMemberId } = useAppStore();
     const [step, setStep] = useState(1); // 1: Image/Total, 2: Payer/Split
-    const [total, setTotal] = useState('');
-    const [description, setDescription] = useState('');
-    const [image, setImage] = useState(null); // URL for preview
+    const [total, setTotal] = useState(initialData?.total || '');
+    const [description, setDescription] = useState(initialData?.description || '');
+    const [image, setImage] = useState(initialData?.image || null); // URL for preview
     const [imageFile, setImageFile] = useState(null); // File object for upload
-    const [payerId, setPayerId] = useState(currentMemberId || currentProfile.members[0]?.id);
+    const [payerId, setPayerId] = useState(initialData?.payer_id || initialData?.payer || currentMemberId || currentProfile.members[0]?.id);
     const [selectedMembers, setSelectedMembers] = useState(
-        currentProfile.members.map(m => m.id) // Default all selected
+        initialData?.splits ? initialData.splits.map(s => s.member) : currentProfile.members.map(m => m.id)
     );
     const [isCompressing, setIsCompressing] = useState(false);
 
@@ -138,7 +138,11 @@ const AddReceipt = ({ onBack }) => {
         if (!total || parseFloat(total) <= 0) return;
         if (selectedMembers.length === 0) return;
 
-        actions.addReceipt(parseFloat(total), payerId, selectedMembers, imageFile, description);
+        if (initialData) {
+            actions.updateReceipt(initialData.id, parseFloat(total), payerId, selectedMembers, imageFile, description);
+        } else {
+            actions.addReceipt(parseFloat(total), payerId, selectedMembers, imageFile, description);
+        }
         onBack();
     };
 

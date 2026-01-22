@@ -155,13 +155,14 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    const addReceipt = async (total, payerId, split, imageFile) => {
+    const addReceipt = async (total, payerId, split, imageFile, description) => {
         if (!state.currentProfile) return;
         try {
             const receiptRes = await axios.post(`${API_URL}/receipts/`, {
                 group: state.currentProfile.id,
                 payer_id: payerId,
                 total,
+                description,
                 split_data: split.map(id => ({ member_id: id, weight: 1 }))
             });
 
@@ -175,6 +176,38 @@ export const AppProvider = ({ children }) => {
             refreshProfile();
         } catch (e) {
             console.error("Add Receipt Error:", e.response?.data || e.message);
+        }
+    };
+
+    const updateReceipt = async (receiptId, total, payerId, split, imageFile, description) => {
+        if (!state.currentProfile) return;
+        try {
+            await axios.patch(`${API_URL}/receipts/${receiptId}/`, {
+                payer_id: payerId,
+                total,
+                description,
+                split_data: split.map(id => ({ member_id: id, weight: 1 }))
+            });
+
+            if (imageFile) {
+                const imageForm = new FormData();
+                imageForm.append('image', imageFile, 'receipt.jpg');
+                await axios.patch(`${API_URL}/receipts/${receiptId}/`, imageForm);
+            }
+
+            refreshProfile();
+        } catch (e) {
+            console.error("Update Receipt Error:", e.response?.data || e.message);
+        }
+    };
+
+    const deleteReceipt = async (receiptId) => {
+        if (!state.currentProfile) return;
+        try {
+            await axios.delete(`${API_URL}/receipts/${receiptId}/`);
+            refreshProfile();
+        } catch (e) {
+            console.error("Delete Receipt Error:", e.response?.data || e.message);
         }
     };
 
@@ -242,7 +275,7 @@ export const AppProvider = ({ children }) => {
             dispatch,
             currentProfile: state.currentProfile,
             currentMemberId: state.currentMemberId,
-            actions: { createProfile, joinGroup, addMember, addReceipt, refreshProfile, getGroupDetails, updateGroupId, fetchSettlements, fetchBalances, logout: () => dispatch({ type: 'LOGOUT' }) }
+            actions: { createProfile, joinGroup, addMember, addReceipt, updateReceipt, deleteReceipt, refreshProfile, getGroupDetails, updateGroupId, fetchSettlements, fetchBalances, logout: () => dispatch({ type: 'LOGOUT' }) }
         }}>
             {children}
         </AppContext.Provider>

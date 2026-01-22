@@ -2,7 +2,8 @@ import { ArrowLeft, Clock, Receipt, X, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const MemberGallery = ({ memberId, onBack, currentProfile }) => {
+const MemberGallery = ({ memberId, onBack, currentProfile, onEdit }) => {
+    const { actions, currentMemberId } = useAppStore();
     const member = currentProfile.members.find(m => m.id === memberId);
     const [zoomedImage, setZoomedImage] = useState(null);
 
@@ -12,6 +13,13 @@ const MemberGallery = ({ memberId, onBack, currentProfile }) => {
     ).reverse();
 
     const totalSpent = memberReceipts.reduce((sum, r) => sum + parseFloat(r.total), 0);
+
+    const handleDelete = async (receiptId, e) => {
+        e.stopPropagation();
+        if (window.confirm("Are you sure you want to delete this expense?")) {
+            await actions.deleteReceipt(receiptId);
+        }
+    };
 
     return (
         <div className="flex flex-col h-full animate-fade-in relative">
@@ -44,54 +52,78 @@ const MemberGallery = ({ memberId, onBack, currentProfile }) => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {memberReceipts.map(receipt => (
-                            <div key={receipt.id} className="glass-panel group overflow-hidden bg-surface border-border hover:border-primary/50 transition-all hover:shadow-md">
-                                {/* Image / Placeholder */}
-                                <div
-                                    className={`h-48 bg-surface-hover relative overflow-hidden border-b border-border ${receipt.image ? 'cursor-zoom-in' : ''}`}
-                                    onClick={() => receipt.image && setZoomedImage(receipt.image)}
-                                >
-                                    {receipt.image ? (
-                                        <>
-                                            <img
-                                                src={receipt.image?.replace(/^(?:https?:)?\/\/[^/]+/, '')}
-                                                alt={receipt.description}
-                                                className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                            />
-                                            {/* Hover Overlay with Zoom Icon */}
-                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                                <div className="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm">
-                                                    <ZoomIn size={24} />
-                                                </div>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-surface-hover">
-                                            <Receipt size={48} className="text-muted/30 group-hover:text-primary transition-colors" />
+                        {memberReceipts.map(receipt => {
+                            const isOwnReceipt = currentMemberId === (receipt.payer_id || receipt.payer);
+                            return (
+                                <div key={receipt.id} className="glass-panel group relative overflow-hidden bg-surface border-border hover:border-primary/50 transition-all hover:shadow-md">
+
+                                    {/* Action Buttons (Only for Owner) */}
+                                    {isOwnReceipt && (
+                                        <div className="absolute top-2 right-2 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); onEdit(receipt); }}
+                                                className="p-2 bg-black/50 text-white rounded-full hover:bg-primary transition-colors backdrop-blur-sm"
+                                                title="Edit"
+                                            >
+                                                <Edit2 size={16} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => handleDelete(receipt.id, e)}
+                                                className="p-2 bg-black/50 text-white rounded-full hover:bg-danger transition-colors backdrop-blur-sm"
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     )}
-                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pointer-events-none">
-                                        <span className="text-2xl font-bold font-mono text-white">£{parseFloat(receipt.total).toFixed(2)}</span>
+
+                                    {/* Image / Placeholder */}
+                                    <div
+                                        className={`h-48 bg-surface-hover relative overflow-hidden border-b border-border ${receipt.image ? 'cursor-zoom-in' : ''}`}
+                                        onClick={() => receipt.image && setZoomedImage(receipt.image)}
+                                    >
+                                        {receipt.image ? (
+                                            <>
+                                                <img
+                                                    src={receipt.image?.replace(/^(?:https?:)?\/\/[^/]+/, '')}
+                                                    alt={receipt.description}
+                                                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                                />
+                                                {/* Hover Overlay with Zoom Icon */}
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                                    <div className="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm">
+                                                        <ZoomIn size={24} />
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-surface-hover">
+                                                <Receipt size={48} className="text-muted/30 group-hover:text-primary transition-colors" />
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 pointer-events-none">
+                                            <span className="text-2xl font-bold font-mono text-white">£{parseFloat(receipt.total).toFixed(2)}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Details */}
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-lg mb-1 truncate text-text" title={receipt.description}>{receipt.description || 'Expense'}</h3>
+                                        <div className="flex items-center gap-2 text-xs text-muted mb-3">
+                                            <Clock size={12} />
+                                            <span>{new Date(receipt.created_at).toLocaleDateString()}</span>
+                                            <span>•</span>
+                                            <span>{new Date(receipt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                        </div>
+
+                                        {/* Split info pill */}
+                                        <div className="inline-flex items-center gap-1 bg-surface-hover border border-border rounded-full px-2 py-1 text-xs text-muted">
+                                            <span>Split with {receipt.splits?.length || 'all'}</span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                {/* Details */}
-                                <div className="p-4">
-                                    <h3 className="font-bold text-lg mb-1 truncate text-text" title={receipt.description}>{receipt.description || 'Expense'}</h3>
-                                    <div className="flex items-center gap-2 text-xs text-muted mb-3">
-                                        <Clock size={12} />
-                                        <span>{new Date(receipt.created_at).toLocaleDateString()}</span>
-                                        <span>•</span>
-                                        <span>{new Date(receipt.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                    </div>
-
-                                    {/* Split info pill */}
-                                    <div className="inline-flex items-center gap-1 bg-surface-hover border border-border rounded-full px-2 py-1 text-xs text-muted">
-                                        <span>Split with {receipt.splits?.length || 'all'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
