@@ -69,22 +69,24 @@ const Dashboard = () => {
     // --- Sub-Components/Views ---
 
     const Header = () => (
-        <header className="flex-none p-4 pt-8 md:p-6 sticky top-0 bg-bg/80 backdrop-blur-md z-30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/50 md:border-none md:bg-transparent">
+        <header className="flex-none p-4 pt-8 md:p-6 sticky top-0 z-30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-glass/80 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.03)] md:border-none md:bg-transparent md:shadow-none transition-all duration-300">
             <div className="w-full md:w-auto">
                 <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-gradient mb-1 tracking-tight">{currentProfile.name}</h1>
+                    <div className="bg-white/60 dark:bg-black/20 border border-white/50 dark:border-white/10 shadow-sm backdrop-blur-md px-6 py-2.5 rounded-full mb-2 transform transition-transform hover:scale-[1.02] duration-300">
+                        <h1 className="text-2xl font-extrabold text-primary tracking-tight m-0 leading-none drop-shadow-sm">{currentProfile.name}</h1>
+                    </div>
                     <div className="flex md:hidden items-center gap-3">
-                        <button onClick={actions.refreshProfile} className="p-2 bg-surface rounded-full border border-border shadow-sm text-muted" title="Refresh">
+                        <button onClick={actions.refreshProfile} className="p-2 bg-surface/50 rounded-full border border-white/20 shadow-sm text-muted backdrop-blur-sm" title="Refresh">
                             <RefreshCw size={18} className={state.isLoading ? 'animate-spin text-primary' : ''} />
                         </button>
-                        <button onClick={actions.logout} className="p-2 bg-surface rounded-full border border-border shadow-sm text-muted" title="Logout">
+                        <button onClick={actions.logout} className="p-2 bg-surface/50 rounded-full border border-white/20 shadow-sm text-muted backdrop-blur-sm" title="Logout">
                             <LogOut size={18} className="text-danger" />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-sm text-muted mt-2">
-                    <div className="flex items-center gap-2 bg-surface px-3 py-1.5 rounded-full border border-border shadow-sm backdrop-blur-sm">
+                <div className="flex items-center gap-3 text-sm text-muted mt-2 pl-1">
+                    <div className="flex items-center gap-2 bg-surface/60 px-3 py-1.5 rounded-full border border-white/30 shadow-sm backdrop-blur-sm">
                         <span className="text-[10px] uppercase tracking-wider font-bold text-primary opacity-80">ID</span>
                         {isEditingId ? (
                             <div className="flex items-center gap-2">
@@ -99,14 +101,14 @@ const Dashboard = () => {
                             </div>
                         ) : (
                             <div className="flex items-center gap-2 group cursor-pointer" onClick={copyToClipboard}>
-                                <span className="font-mono tracking-wider text-text">{currentProfile.public_id}</span>
+                                <span className="font-mono tracking-wider text-text font-semibold">{currentProfile.public_id}</span>
                                 {copied ? <Check size={12} className="text-success" /> : <Copy size={12} className="opacity-50 group-hover:opacity-100" />}
                             </div>
                         )}
                     </div>
 
                     {!isEditingId && state.is_admin && (
-                        <button onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }} className="p-1 opacity-50 hover:opacity-100">
+                        <button onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }} className="p-1 opacity-50 hover:opacity-100 bg-surface/50 rounded-full border border-white/20 shadow-sm">
                             <Edit2 size={14} />
                         </button>
                     )}
