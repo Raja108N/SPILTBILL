@@ -80,7 +80,7 @@ const Dashboard = () => {
         }).format(new Date());
 
         return (
-            <header className="flex-none pt-4 pb-2 px-6 sticky top-0 z-30 bg-surface-glass/95 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-300">
+            <header className="flex-none pt-4 pb-2 px-6 relative z-30 bg-surface-glass/95 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-300">
                 <div className="flex flex-col gap-3">
                     {/* Top Row: Greeting, Date & ID */}
                     <div className="flex items-center justify-between">
@@ -231,11 +231,11 @@ const Dashboard = () => {
 
     // 2. Dashboard View (with Bottom Nav integration on Mobile)
     return (
-        <div className="h-full flex flex-col animate-fade-in md:p-6 max-w-[1200px] mx-auto w-full">
+        <div className="h-[100dvh] flex flex-col animate-fade-in md:h-full md:p-6 max-w-[1200px] mx-auto w-full overflow-hidden md:overflow-visible">
             <Header />
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto pb-28 md:pb-0 px-4 md:px-0 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto pb-32 md:pb-0 px-4 md:px-0 custom-scrollbar scroll-smooth">
 
                 {/* Mobile View Switcher within Content Area */}
                 {view === 'members' ? (
