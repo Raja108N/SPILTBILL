@@ -1,4 +1,4 @@
-import { ArrowRight, Camera, Check, X } from 'lucide-react';
+import { ArrowRight, Camera, Check, Image as ImageIcon, X } from 'lucide-react';
 import { useState } from 'react';
 import { useAppStore } from '../store/AppStore';
 
@@ -48,23 +48,48 @@ const AddReceipt = ({ onBack }) => {
                 </div>
 
                 <div className="flex-1 flex flex-col gap-6 overflow-y-auto no-scrollbar">
-                    {/* Image Upload Mock */}
-                    <div className="h-48 border border-dashed border-border rounded-2xl flex flex-col items-center justify-center bg-surface relative overflow-hidden group hover:border-primary/50 transition-all cursor-pointer">
+                    {/* Image Upload Split View */}
+                    <div className="h-48 border border-dashed border-border rounded-2xl flex flex-col items-center justify-center bg-surface relative overflow-hidden transition-all">
                         {image ? (
-                            <img src={image} alt="Receipt" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                            <>
+                                <img src={image} alt="Receipt" className="absolute inset-0 w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-black/20" />
+                                <button
+                                    onClick={(e) => { e.preventDefault(); setImage(null); setImageFile(null); }}
+                                    className="absolute top-2 right-2 p-2 bg-black/50 text-white rounded-full hover:bg-danger transition-colors z-10 backdrop-blur-sm"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </>
                         ) : (
-                            <div className="flex flex-col items-center text-muted group-hover:text-primary transition-colors">
-                                <Camera size={32} className="mb-2" />
-                                <span className="text-sm font-medium">Add Receipt Photo</span>
+                            <div className="flex w-full h-full divide-x divide-border">
+                                <label className="flex-1 flex flex-col items-center justify-center hover:bg-surface-hover cursor-pointer group active:bg-primary/5 transition-colors">
+                                    <div className="p-3.5 bg-primary/10 rounded-full mb-3 group-hover:scale-110 transition-transform shadow-sm">
+                                        <Camera size={26} className="text-primary" />
+                                    </div>
+                                    <span className="text-xs font-bold text-muted uppercase tracking-wider group-hover:text-primary transition-colors">Camera</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        capture="environment"
+                                        className="hidden"
+                                        onChange={handleImageUpload}
+                                    />
+                                </label>
+                                <label className="flex-1 flex flex-col items-center justify-center hover:bg-surface-hover cursor-pointer group active:bg-accent/5 transition-colors">
+                                    <div className="p-3.5 bg-accent/10 rounded-full mb-3 group-hover:scale-110 transition-transform shadow-sm">
+                                        <ImageIcon size={26} className="text-accent" />
+                                    </div>
+                                    <span className="text-xs font-bold text-muted uppercase tracking-wider group-hover:text-accent transition-colors">Gallery / Files</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleImageUpload}
+                                    />
+                                </label>
                             </div>
                         )}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                            onChange={handleImageUpload}
-                        />
                     </div>
 
                     {/* Total Input */}
