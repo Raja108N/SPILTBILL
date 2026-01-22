@@ -1,4 +1,4 @@
-const CACHE_NAME = 'spiltbill-cache-v1';
+const CACHE_NAME = 'spiltbill-cache-v2';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -7,6 +7,8 @@ const urlsToCache = [
 
 // Install SW
 self.addEventListener('install', (event) => {
+    // skipWaiting ensures the new SW takes over immediately
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
@@ -18,16 +20,37 @@ self.addEventListener('install', (event) => {
 
 // Listen for requests
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request)
-            .then((response) => {
-                // Cache hit - return response
-                if (response) {
+    // Network-First for HTML (navigation) requests to ensure fresh index.html
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    // Update cache with new version
+                    if (response && response.status === 200 && response.type === 'basic') {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseClone);
+                        });
+                    }
                     return response;
-                }
-                return fetch(event.request);
-            })
-    );
+                })
+                .catch(() => {
+                    // Fallback to cache if offline
+                    return caches.match(event.request);
+                })
+        );
+    } else {
+        // Cache-First for everything else (assets, images, scripts)
+        event.respondWith(
+            caches.match(event.request)
+                .then((response) => {
+                    if (response) {
+                        return response;
+                    }
+                    return fetch(event.request);
+                })
+        );
+    }
 });
 
 // Activate the SW
