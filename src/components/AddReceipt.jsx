@@ -36,23 +36,35 @@ const AddReceipt = ({ onBack }) => {
         setIsCameraOpen(false);
     };
 
+    // Effect to attach stream to video element when it becomes available
+    useEffect(() => {
+        if (isCameraOpen && videoRef.current && streamRef.current) {
+            videoRef.current.srcObject = streamRef.current;
+        }
+    }, [isCameraOpen]);
+
     const startCamera = async () => {
         try {
-            setIsCameraOpen(true);
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: "environment" }
-            });
-            streamRef.current = stream;
-            // Short delay to ensure video element is mounted
-            setTimeout(() => {
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-            }, 100);
+            // Try environment facing camera first (phones)
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" }
+                });
+                streamRef.current = stream;
+                setIsCameraOpen(true);
+            } catch (envError) {
+                console.warn("Environment camera not found, trying fallback...", envError);
+                // Fallback to any available camera (laptops/desktops)
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true
+                });
+                streamRef.current = stream;
+                setIsCameraOpen(true);
+            }
         } catch (err) {
             console.error("Camera error:", err);
             setIsCameraOpen(false);
-            alert("Could not access camera. Please check permissions.");
+            alert("Could not access camera. Please ensure you have granted camera permissions and are using HTTPS or localhost.");
         }
     };
 
