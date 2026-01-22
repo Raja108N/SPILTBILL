@@ -68,63 +68,81 @@ const Dashboard = () => {
 
     // --- Sub-Components/Views ---
 
-    const Header = () => (
-        <header className="flex-none p-4 pt-8 md:p-6 sticky top-0 z-30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-glass/80 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.03)] md:border-none md:bg-transparent md:shadow-none transition-all duration-300">
-            <div className="w-full md:w-auto">
-                <div className="flex items-center justify-between">
-                    <div className="bg-white/60 dark:bg-black/20 border border-white/50 dark:border-white/10 shadow-sm backdrop-blur-md px-6 py-2.5 rounded-full mb-2 transform transition-transform hover:scale-[1.02] duration-300">
-                        <h1 className="text-2xl font-extrabold text-primary tracking-tight m-0 leading-none drop-shadow-sm">{currentProfile.name}</h1>
-                    </div>
-                    <div className="flex md:hidden items-center gap-3">
-                        <button onClick={actions.refreshProfile} className="p-2 bg-surface/50 rounded-full border border-white/20 shadow-sm text-muted backdrop-blur-sm" title="Refresh">
-                            <RefreshCw size={18} className={state.isLoading ? 'animate-spin text-primary' : ''} />
-                        </button>
-                        <button onClick={actions.logout} className="p-2 bg-surface/50 rounded-full border border-white/20 shadow-sm text-muted backdrop-blur-sm" title="Logout">
-                            <LogOut size={18} className="text-danger" />
-                        </button>
-                    </div>
-                </div>
+    const Header = () => {
+        const currentUser = currentProfile.members.find(m => m.id === state.currentMemberId);
 
-                <div className="flex items-center gap-3 text-sm text-muted mt-2 pl-1">
-                    <div className="flex items-center gap-2 bg-surface/60 px-3 py-1.5 rounded-full border border-white/30 shadow-sm backdrop-blur-sm">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-primary opacity-80">ID</span>
+        // Date formatter
+        const formattedDate = new Intl.DateTimeFormat('en-GB', {
+            weekday: 'short',
+            day: '2-digit',
+            month: 'short'
+        }).format(new Date());
+
+        return (
+            <header className="flex-none pt-4 pb-2 px-6 sticky top-0 z-30 bg-surface-glass/95 backdrop-blur-xl border-b border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all duration-300">
+                <div className="flex items-end justify-between gap-4">
+                    {/* Left Side: Greeting & Group */}
+                    <div className="flex flex-col gap-1.5">
+                        {/* Greeting & Date Row - Ultra slim */}
+                        <div className="flex items-center gap-2 ml-1">
+                            <span className="text-sm font-semibold text-muted">Hi, <span className="text-text font-bold">{currentUser?.name?.split(' ')[0]}</span></span>
+                            <span className="w-1 h-1 rounded-full bg-border"></span>
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface/50 border border-white/20 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
+                                <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
+                                <span className="text-[10px] font-mono font-medium text-muted uppercase tracking-wider">{formattedDate}</span>
+                            </div>
+                        </div>
+
+                        {/* Group Name Pill */}
+                        <div className="flex items-center gap-2">
+                            <div className="bg-white/60 dark:bg-black/20 border border-white/50 dark:border-white/10 shadow-sm backdrop-blur-md px-5 py-1.5 rounded-full transform transition-transform hover:scale-[1.02] duration-300 flex items-center gap-2 group cursor-default">
+                                <div className="w-2 h-2 rounded-full bg-primary/80 group-hover:bg-primary transition-colors shadow-glow-sm"></div>
+                                <h1 className="text-xl font-extrabold text-primary tracking-tight m-0 leading-none drop-shadow-sm">{currentProfile.name}</h1>
+                            </div>
+
+                            {/* ID Badge - Compact */}
+                            {!isEditingId && (
+                                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-surface/40 border border-white/10 hover:bg-surface/80 transition-all cursor-pointer group/id" onClick={copyToClipboard}>
+                                    <span className="font-mono text-[10px] text-muted group-hover/id:text-primary transition-colors font-bold tracking-widest">{currentProfile.public_id}</span>
+                                    {copied ? <Check size={10} className="text-success" /> : <Copy size={10} className="text-muted opacity-0 group-hover/id:opacity-100 transition-opacity" />}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right Side: Actions */}
+                    <div className="flex items-center gap-2 pb-1">
                         {isEditingId ? (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 bg-surface/80 p-1 rounded-full border border-primary/20 animate-scale-in">
                                 <input
-                                    className="bg-transparent border-b border-primary outline-none w-24 text-text font-mono"
+                                    className="bg-transparent border-none outline-none w-20 text-xs text-center font-mono"
                                     value={newPublicId}
                                     onChange={e => setNewPublicId(e.target.value)}
                                     autoFocus
                                 />
-                                <button onClick={handleUpdateId} className="text-primary"><Check size={14} /></button>
-                                <button onClick={() => setIsEditingId(false)} className="text-danger"><X size={14} /></button>
+                                <button onClick={handleUpdateId} className="p-1.5 rounded-full bg-primary text-white shadow-sm"><Check size={12} /></button>
+                                <button onClick={() => setIsEditingId(false)} className="p-1.5 rounded-full hover:bg-danger/10 text-danger"><X size={12} /></button>
                             </div>
                         ) : (
-                            <div className="flex items-center gap-2 group cursor-pointer" onClick={copyToClipboard}>
-                                <span className="font-mono tracking-wider text-text font-semibold">{currentProfile.public_id}</span>
-                                {copied ? <Check size={12} className="text-success" /> : <Copy size={12} className="opacity-50 group-hover:opacity-100" />}
-                            </div>
+                            <>
+                                {state.is_admin && (
+                                    <button onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }} className="p-2.5 bg-surface/50 hover:bg-surface text-muted hover:text-text rounded-full border border-transparent hover:border-border transition-all shadow-sm active:scale-95" title="Edit ID">
+                                        <Edit2 size={16} strokeWidth={2} />
+                                    </button>
+                                )}
+                                <button onClick={actions.refreshProfile} className="p-2.5 bg-surface/50 hover:bg-surface text-muted hover:text-primary rounded-full border border-transparent hover:border-border transition-all shadow-sm active:scale-95" title="Refresh">
+                                    <RefreshCw size={16} strokeWidth={2} className={state.isLoading ? 'animate-spin' : ''} />
+                                </button>
+                                <button onClick={actions.logout} className="p-2.5 bg-surface/50 hover:bg-surface text-muted hover:text-danger rounded-full border border-transparent hover:border-border transition-all shadow-sm active:scale-95" title="Logout">
+                                    <LogOut size={16} strokeWidth={2} />
+                                </button>
+                            </>
                         )}
                     </div>
-
-                    {!isEditingId && state.is_admin && (
-                        <button onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }} className="p-1 opacity-50 hover:opacity-100 bg-surface/50 rounded-full border border-white/20 shadow-sm">
-                            <Edit2 size={14} />
-                        </button>
-                    )}
                 </div>
-            </div>
-
-            <div className="hidden md:flex items-center gap-3">
-                <button onClick={actions.refreshProfile} className="p-2 hover:bg-surface-hover rounded-full transition-colors" title="Refresh">
-                    <RefreshCw size={20} className={state.isLoading ? 'animate-spin text-primary' : 'text-muted'} />
-                </button>
-                <button onClick={actions.logout} className="p-2 hover:bg-danger/10 text-muted hover:text-danger rounded-full transition-colors" title="Logout">
-                    <LogOut size={20} />
-                </button>
-            </div>
-        </header>
-    );
+            </header>
+        );
+    };
 
     const BalancesList = () => (
         <div className="space-y-3">
