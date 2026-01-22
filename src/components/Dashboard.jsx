@@ -1,4 +1,4 @@
-import { ArrowDownLeft, ArrowUpRight, Banknote, Check, ChevronRight, Copy, Edit2, Home, LogOut, Plus, RefreshCw, Users, Wallet, X } from 'lucide-react';
+import { ArrowRight, Banknote, Check, ChevronRight, Copy, Home, LogOut, Plus, RefreshCw, Users, Wallet, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useAppStore } from '../store/AppStore';
 import AddReceipt from './AddReceipt';
@@ -69,57 +69,55 @@ const Dashboard = () => {
     // --- Sub-Components/Views ---
 
     const Header = () => (
-        <header className="flex-none p-4 pt-8 md:p-6 sticky top-0 bg-bg/80 backdrop-blur-md z-30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/50 md:border-none md:bg-transparent">
-            <div className="w-full md:w-auto">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-3xl font-bold text-gradient mb-1 tracking-tight">{currentProfile.name}</h1>
-                    <div className="flex md:hidden items-center gap-3">
-                        <button onClick={actions.refreshProfile} className="p-2 bg-surface rounded-full border border-border shadow-sm text-muted" title="Refresh">
-                            <RefreshCw size={18} className={state.isLoading ? 'animate-spin text-primary' : ''} />
+        <header className="flex-none bg-gradient-to-br from-primary via-purple-600 to-accent text-white p-6 pb-20 md:pb-24 relative overflow-hidden z-0">
+            {/* Decorative Elements */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-black/10 rounded-full blur-[60px] translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
+
+            <div className="relative z-10 flex flex-col gap-4">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h1 className="text-4xl font-black tracking-tight drop-shadow-md">{currentProfile.name}</h1>
+                        <div className="flex items-center gap-3 mt-2">
+                            {/* ID Badge Pill */}
+                            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/20 px-3 py-1 rounded-full shadow-sm hover:bg-white/30 transition-colors">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">ID</span>
+                                {isEditingId ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            className="bg-transparent border-b border-white outline-none w-16 text-white font-mono font-bold text-sm"
+                                            value={newPublicId}
+                                            onChange={e => setNewPublicId(e.target.value)}
+                                            autoFocus
+                                        />
+                                        <button onClick={handleUpdateId}><Check size={12} strokeWidth={3} className="text-white" /></button>
+                                        <button onClick={() => setIsEditingId(false)}><X size={12} strokeWidth={3} className="text-white" /></button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 group/id cursor-pointer" onClick={copyToClipboard}>
+                                        <span className="font-mono font-bold text-sm tracking-wide">{currentProfile.public_id}</span>
+                                        {copied ? <Check size={12} /> : <Copy size={12} className="opacity-70 group-hover/id:opacity-100" />}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={actions.refreshProfile}
+                            className="bg-white/20 hover:bg-white/30 rounded-full p-2.5 backdrop-blur-md transition-all active:scale-95 border border-white/10"
+                        >
+                            <RefreshCw size={20} className={`text-white ${state.isLoading ? 'animate-spin' : ''}`} />
                         </button>
-                        <button onClick={actions.logout} className="p-2 bg-surface rounded-full border border-border shadow-sm text-muted" title="Logout">
-                            <LogOut size={18} className="text-danger" />
+                        <button
+                            onClick={actions.logout}
+                            className="bg-white/20 hover:bg-white/30 rounded-full p-2.5 backdrop-blur-md transition-all active:scale-95 border border-white/10"
+                        >
+                            <LogOut size={20} className="text-white" />
                         </button>
                     </div>
                 </div>
-
-                <div className="flex items-center gap-3 text-sm text-muted mt-2">
-                    <div className="flex items-center gap-2 bg-surface px-3 py-1.5 rounded-full border border-border shadow-sm backdrop-blur-sm">
-                        <span className="text-[10px] uppercase tracking-wider font-bold text-primary opacity-80">ID</span>
-                        {isEditingId ? (
-                            <div className="flex items-center gap-2">
-                                <input
-                                    className="bg-transparent border-b border-primary outline-none w-24 text-text font-mono"
-                                    value={newPublicId}
-                                    onChange={e => setNewPublicId(e.target.value)}
-                                    autoFocus
-                                />
-                                <button onClick={handleUpdateId} className="text-primary"><Check size={14} /></button>
-                                <button onClick={() => setIsEditingId(false)} className="text-danger"><X size={14} /></button>
-                            </div>
-                        ) : (
-                            <div className="flex items-center gap-2 group cursor-pointer" onClick={copyToClipboard}>
-                                <span className="font-mono tracking-wider text-text">{currentProfile.public_id}</span>
-                                {copied ? <Check size={12} className="text-success" /> : <Copy size={12} className="opacity-50 group-hover:opacity-100" />}
-                            </div>
-                        )}
-                    </div>
-
-                    {!isEditingId && state.is_admin && (
-                        <button onClick={() => { setIsEditingId(true); setNewPublicId(currentProfile.public_id); }} className="p-1 opacity-50 hover:opacity-100">
-                            <Edit2 size={14} />
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            <div className="hidden md:flex items-center gap-3">
-                <button onClick={actions.refreshProfile} className="p-2 hover:bg-surface-hover rounded-full transition-colors" title="Refresh">
-                    <RefreshCw size={20} className={state.isLoading ? 'animate-spin text-primary' : 'text-muted'} />
-                </button>
-                <button onClick={actions.logout} className="p-2 hover:bg-danger/10 text-muted hover:text-danger rounded-full transition-colors" title="Logout">
-                    <LogOut size={20} />
-                </button>
             </div>
         </header>
     );
@@ -132,17 +130,24 @@ const Dashboard = () => {
                 const isNegative = net < 0;
 
                 return (
-                    <div key={member.id} className="p-4 rounded-3xl bg-surface border border-border flex items-center justify-between group md:hover:bg-surface-hover transition-colors shadow-sm">
+                    <div key={member.id} className="p-4 rounded-[20px] bg-white border border-gray-100 flex items-center justify-between group shadow-sm">
                         <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-inner ${isPositive ? 'bg-success/10 text-success' : isNegative ? 'bg-danger/10 text-danger' : 'bg-surface-hover border border-border text-muted'}`}>
+                            {/* Avatar */}
+                            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-lg font-bold text-gray-600 border border-gray-200 shadow-inner">
                                 {member.name.charAt(0).toUpperCase()}
                             </div>
-                            <span className="font-medium text-lg text-text">{member.name}</span>
+                            <span className="font-bold text-gray-800 text-lg">{member.name}</span>
                         </div>
-                        <div className={`flex items-center gap-1 font-mono font-bold text-lg ${isPositive ? 'text-success' : isNegative ? 'text-danger' : 'text-muted'}`}>
-                            {isPositive && <ArrowUpRight size={18} />}
-                            {isNegative && <ArrowDownLeft size={18} />}
-                            <span>{net === 0 ? '-' : `£${Math.abs(net).toFixed(2)}`}</span>
+
+                        <div className="text-right">
+                            <div className={`flex items-center justify-end gap-1 font-mono font-bold text-xl ${isPositive ? 'text-green-600' : isNegative ? 'text-red-500' : 'text-gray-400'}`}>
+                                {isPositive && <ArrowRight size={16} className="rotate-180" />}
+                                {isNegative && <ArrowRight size={16} />}
+                                <span>{net === 0 ? '-' : `£${Math.abs(net).toFixed(2)}`}</span>
+                            </div>
+                            <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wide">
+                                {isPositive ? "Owed by group" : isNegative ? "Owes the group" : "Settled"}
+                            </span>
                         </div>
                     </div>
                 );
@@ -151,7 +156,7 @@ const Dashboard = () => {
     );
 
     const MembersView = () => (
-        <div className="p-4 space-y-4 pb-32 animate-fade-in">
+        <div className="p-4 space-y-4 pb-32 animate-fade-in pt-6">
             <h2 className="text-xl font-bold mb-4 text-text">Group Members</h2>
             <form onSubmit={handleAddMember} className="p-4 rounded-3xl bg-surface border border-primary/20 flex gap-3 mb-6 shadow-glow">
                 <input
@@ -201,69 +206,69 @@ const Dashboard = () => {
         />
     );
 
-    // 2. Dashboard View (with Bottom Nav integration on Mobile)
+    // 2. Dashboard View
     return (
-        <div className="h-full flex flex-col animate-fade-in md:p-6 max-w-[1200px] mx-auto w-full">
+        <div className="h-full flex flex-col animate-fade-in bg-gray-50/50 relative">
+            {/* Top Full-Width Header */}
             <Header />
 
-            {/* Content Area */}
-            <div className="flex-1 overflow-y-auto pb-28 md:pb-0 px-4 md:px-0 custom-scrollbar">
+            {/* Overlapping Content Area */}
+            <div className="flex-1 -mt-10 rounded-t-[32px] bg-gray-50/50 overflow-hidden relative z-10">
+                <div className="h-full overflow-y-auto pb-32 px-4 pt-6 custom-scrollbar">
 
-                {/* Mobile View Switcher within Content Area */}
-                {view === 'members' ? (
-                    <MembersView />
-                ) : (
-                    // Default Dashboard View
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4 md:mt-0">
+                    {/* Mobile View Switcher within Content Area */}
+                    {view === 'members' ? (
+                        <MembersView />
+                    ) : (
+                        // Default Dashboard View
+                        <div className="flex flex-col gap-6 max-w-[800px] mx-auto">
 
-                        {/* Balances Section */}
-                        <div className="lg:col-span-12 xl:col-span-5">
-                            <div className="glass-panel p-5 flex flex-col gap-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-2 bg-primary/10 rounded-xl text-primary"><Users size={20} /></div>
-                                        <h2 className="text-lg font-semibold text-text">Balances</h2>
+                            {/* Balances Section Card */}
+                            <div className="bg-white rounded-[28px] p-2 shadow-lg border border-gray-100">
+                                <div className="p-4 pb-2 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl">
+                                            <Users size={20} />
+                                        </div>
+                                        <h2 className="text-lg font-bold text-gray-800">Group Balances</h2>
                                     </div>
                                     <button
                                         onClick={() => setView('settle')}
-                                        className="text-xs font-bold bg-surface hover:bg-surface-hover text-text px-4 py-2 rounded-full border border-border transition-all flex items-center gap-2 shadow-sm"
+                                        className="text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 px-4 py-2 rounded-full border border-purple-100 transition-all flex items-center gap-2"
                                     >
-                                        <Banknote size={14} className="text-primary" /> Settle Up
+                                        <Banknote size={14} /> Settle Up
                                     </button>
                                 </div>
-                                <BalancesList />
-                                <div className="md:hidden">
-                                    {/* Mobile-only hint */}
-                                    <p className="text-center text-xs text-muted">Tap 'Settle Up' to clear debts.</p>
+
+                                <div className="p-2">
+                                    <BalancesList />
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Recent Activity / Spending Summary */}
-                        <div className="lg:col-span-12 xl:col-span-7">
-                            <div className="glass-panel p-5 min-h-[300px]">
+                            {/* Recent Activity / Spending Summary */}
+                            <div className="bg-white rounded-[28px] p-6 shadow-sm border border-gray-100 min-h-[200px]">
                                 <div className="flex items-center gap-2 mb-6">
-                                    <div className="p-2 bg-accent/10 rounded-xl text-accent"><Wallet size={20} /></div>
-                                    <h2 className="text-lg font-semibold text-text">Spending Summary</h2>
+                                    <div className="p-2 bg-blue-50 text-blue-600 rounded-xl"><Wallet size={20} /></div>
+                                    <h2 className="text-lg font-bold text-gray-800">Spending Summary</h2>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {currentProfile.members.map(member => (
-                                        <div key={member.id} className="p-4 rounded-3xl bg-surface border border-border flex flex-col gap-1 shadow-sm">
-                                            <span className="text-muted text-sm font-medium">{member.name}</span>
-                                            <span className="text-2xl font-mono text-text">£{(memberTotals[member.id] || 0).toFixed(2)}</span>
-                                            <div className="w-full bg-surface-hover h-2 rounded-full mt-2 overflow-hidden">
-                                                <div className="bg-gradient-to-r from-accent to-primary h-full rounded-full" style={{ width: `${Math.min(((memberTotals[member.id] || 0) / 1000) * 100, 100)}%` }}></div>
+                                        <div key={member.id} className="p-4 rounded-3xl bg-gray-50 border border-gray-100 flex flex-col gap-1">
+                                            <span className="text-gray-500 text-sm font-medium">{member.name}</span>
+                                            <span className="text-2xl font-mono text-gray-800">£{(memberTotals[member.id] || 0).toFixed(2)}</span>
+                                            <div className="w-full bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                                                <div className="bg-gradient-to-r from-blue-400 to-purple-500 h-full rounded-full" style={{ width: `${Math.min(((memberTotals[member.id] || 0) / 1000) * 100, 100)}%` }}></div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
 
-            {/* Desktop FAB (Hidden on Mobile, replaced by Bottom Nav FAB) */}
+            {/* Desktop FAB (Hidden on Mobile) */}
             <div className="hidden md:block fixed bottom-8 right-8 z-50">
                 <button
                     onClick={() => setView('add-receipt')}
@@ -274,31 +279,39 @@ const Dashboard = () => {
             </div>
 
             {/* Mobile Bottom Navigation & FAB */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 h-[90px] glass-panel-heavy rounded-t-[32px] rounded-b-none flex items-start justify-between px-10 pt-3 shadow-[0_-5px_30px_rgba(0,0,0,0.05)] z-40 border-t border-white/40 pb-[env(safe-area-inset-bottom,20px)]">
-                <button
-                    onClick={() => setView('dashboard')}
-                    className={`flex flex-col items-center justify-center gap-1 transition-all mt-1 ${view === 'dashboard' ? 'text-primary transform scale-105 font-bold' : 'text-muted hover:text-text'}`}
-                >
-                    <Home size={26} className={view === 'dashboard' ? 'fill-primary/20 stroke-[2.5px]' : 'stroke-2'} />
-                    <span className="text-[10px] font-medium">Home</span>
-                </button>
+            <div className="md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-[400px] h-[72px] bg-white rounded-[3rem] shadow-[0_8px_30px_rgba(0,0,0,0.12)] z-50 grid grid-cols-5 items-center px-2 relative">
 
-                <div className="relative -top-10">
+                {/* Home Button (Spans 2 columns) */}
+                <div className="col-span-2 flex justify-center">
                     <button
-                        onClick={() => setView('add-receipt')}
-                        className="w-[72px] h-[72px] p-4 rounded-full bg-primary text-white shadow-glow-accent flex items-center justify-center transition-transform active:scale-95 border-[6px] border-bg hover:shadow-glow hover:-translate-y-1"
+                        onClick={() => setView('dashboard')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${view === 'dashboard' ? 'text-[#8B5CF6]' : 'text-gray-400'}`}
                     >
-                        <Plus size={32} strokeWidth={3} />
+                        <Home size={26} className={view === 'dashboard' ? 'stroke-[2.5px] fill-[#8B5CF6]/10' : 'stroke-[2px]'} />
+                        <span className="text-[10px] font-bold">Home</span>
                     </button>
                 </div>
 
-                <button
-                    onClick={() => setView('members')}
-                    className={`flex flex-col items-center justify-center gap-1 transition-all mt-1 ${view === 'members' ? 'text-primary transform scale-105 font-bold' : 'text-muted hover:text-text'}`}
-                >
-                    <Users size={26} className={view === 'members' ? 'fill-primary/20 stroke-[2.5px]' : 'stroke-2'} />
-                    <span className="text-[10px] font-medium">Members</span>
-                </button>
+                {/* FAB Container (Middle Column) */}
+                <div className="col-span-1 relative flex justify-center">
+                    <button
+                        onClick={() => setView('add-receipt')}
+                        className="absolute -top-12 w-[72px] h-[72px] rounded-full bg-[#8B5CF6] text-white flex items-center justify-center transition-transform active:scale-95 shadow-[0_10px_25px_rgba(139,92,246,0.6)] ring-[8px] ring-gray-50 md:ring-white"
+                    >
+                        <Plus size={36} strokeWidth={3} />
+                    </button>
+                </div>
+
+                {/* Members Button (Spans 2 columns) */}
+                <div className="col-span-2 flex justify-center">
+                    <button
+                        onClick={() => setView('members')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all duration-300 ${view === 'members' ? 'text-[#8B5CF6]' : 'text-gray-400'}`}
+                    >
+                        <Users size={26} className={view === 'members' ? 'stroke-[2.5px] fill-[#8B5CF6]/10' : 'stroke-[2px]'} />
+                        <span className="text-[10px] font-bold">Members</span>
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -306,4 +319,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
