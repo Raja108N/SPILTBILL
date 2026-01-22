@@ -101,12 +101,12 @@ const Dashboard = () => {
                                 <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center text-primary">
                                     <Home size={16} strokeWidth={2.5} />
                                 </div>
-                                <h1 className="text-lg font-black bg-gradient-to-r from-text to-text/80 bg-clip-text text-transparent tracking-tight leading-none truncate max-w-[150px] md:max-w-xs">{currentProfile.name}</h1>
+                                <h1 className="text-lg font-black text-gray-900 tracking-tight leading-none truncate max-w-[150px] md:max-w-xs">{currentProfile.name}</h1>
                             </div>
 
                             {/* ID Badge - Minimal */}
                             {!isEditingId && (
-                                <div className="hidden sm:flex flex-col items-start justify-center px-3 py-1.5 rounded-xl bg-white/40 border border-white/20 hover:bg-white/60 transition-all cursor-pointer group/id" onClick={copyToClipboard}>
+                                <div className="flex flex-col items-start justify-center px-3 py-1.5 rounded-xl bg-white/40 border border-white/20 hover:bg-white/60 transition-all cursor-pointer group/id" onClick={copyToClipboard}>
                                     <span className="text-[9px] uppercase font-bold text-muted/60 leading-none mb-0.5">ID</span>
                                     <div className="flex items-center gap-1.5">
                                         <span className="font-mono text-xs text-text font-bold tracking-wider">{currentProfile.public_id}</span>
