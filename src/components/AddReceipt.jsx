@@ -1,5 +1,6 @@
+import imageCompression from 'browser-image-compression';
 import { ArrowRight, Camera, Check, Image as ImageIcon, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppStore } from '../store/AppStore';
 
 const AddReceipt = ({ onBack }) => {
@@ -13,12 +14,102 @@ const AddReceipt = ({ onBack }) => {
     const [selectedMembers, setSelectedMembers] = useState(
         currentProfile.members.map(m => m.id) // Default all selected
     );
+    const [isCompressing, setIsCompressing] = useState(false);
+
+    // Camera State
+    const [isCameraOpen, setIsCameraOpen] = useState(false);
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+    const streamRef = useRef(null);
+
+    useEffect(() => {
+        return () => {
+            stopCamera();
+        };
+    }, []);
+
+    const stopCamera = () => {
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop());
+            streamRef.current = null;
+        }
+        setIsCameraOpen(false);
+    };
+
+    const startCamera = async () => {
+        try {
+            setIsCameraOpen(true);
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" }
+            });
+            streamRef.current = stream;
+            // Short delay to ensure video element is mounted
+            setTimeout(() => {
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                }
+            }, 100);
+        } catch (err) {
+            console.error("Camera error:", err);
+            setIsCameraOpen(false);
+            alert("Could not access camera. Please check permissions.");
+        }
+    };
+
+    const handleCompressAndSet = async (file) => {
+        setIsCompressing(true);
+        // Immediate feedback: Show and use original file while compressing
+        const tempUrl = URL.createObjectURL(file);
+        setImage(tempUrl);
+        setImageFile(file);
+
+        try {
+            const options = {
+                maxSizeMB: 0.5,
+                maxWidthOrHeight: 1600,
+                useWebWorker: true,
+                fileType: "image/webp",
+                initialQuality: 0.8
+            };
+            const compressedFile = await imageCompression(file, options);
+
+            // Swap to compressed version
+            URL.revokeObjectURL(tempUrl);
+            setImage(URL.createObjectURL(compressedFile));
+            setImageFile(compressedFile);
+        } catch (error) {
+            console.error("Compression error:", error);
+            // Already set to original file, so just stay there
+        } finally {
+            setIsCompressing(false);
+        }
+    };
 
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setImage(URL.createObjectURL(file));
-            setImageFile(file);
+            handleCompressAndSet(file);
+        }
+    };
+
+    const capturePhoto = () => {
+        if (videoRef.current && canvasRef.current) {
+            const video = videoRef.current;
+            const canvas = canvasRef.current;
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    const file = new File([blob], "camera_capture.webp", { type: "image/webp" });
+                    handleCompressAndSet(file);
+                    stopCamera();
+                }
+            }, 'image/webp', 0.9);
         }
     };
 
@@ -63,24 +154,20 @@ const AddReceipt = ({ onBack }) => {
                             </>
                         ) : (
                             <div className="flex w-full h-full divide-x divide-border">
-                                <label className="flex-1 flex flex-col items-center justify-center hover:bg-surface-hover cursor-pointer group active:bg-primary/5 transition-colors">
+                                <label className="flex-1 flex flex-col items-center justify-center hover:bg-surface-hover cursor-pointer group active:bg-primary/5 transition-colors" onClick={(e) => {
+                                    e.preventDefault();
+                                    startCamera();
+                                }}>
                                     <div className="p-3.5 bg-primary/10 rounded-full mb-3 group-hover:scale-110 transition-transform shadow-sm">
                                         <Camera size={26} className="text-primary" />
                                     </div>
                                     <span className="text-xs font-bold text-muted uppercase tracking-wider group-hover:text-primary transition-colors">Camera</span>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        capture="environment"
-                                        className="hidden"
-                                        onChange={handleImageUpload}
-                                    />
                                 </label>
                                 <label className="flex-1 flex flex-col items-center justify-center hover:bg-surface-hover cursor-pointer group active:bg-accent/5 transition-colors">
                                     <div className="p-3.5 bg-accent/10 rounded-full mb-3 group-hover:scale-110 transition-transform shadow-sm">
                                         <ImageIcon size={26} className="text-accent" />
                                     </div>
-                                    <span className="text-xs font-bold text-muted uppercase tracking-wider group-hover:text-accent transition-colors">Gallery / Files</span>
+                                    <span className="text-xs font-bold text-muted uppercase tracking-wider group-hover:text-accent transition-colors">{isCompressing ? 'Processing...' : 'Gallery / Files'}</span>
                                     <input
                                         type="file"
                                         accept="image/*"
@@ -129,6 +216,50 @@ const AddReceipt = ({ onBack }) => {
                 >
                     Next <ArrowRight size={20} />
                 </button>
+            </div>
+        );
+    }
+
+    if (isCameraOpen) {
+        return (
+            <div className="fixed inset-0 z-50 bg-black flex flex-col animate-fade-in">
+                {/* Hidden Canvas for Capture */}
+                <canvas ref={canvasRef} className="hidden" />
+
+                <div className="relative flex-1 bg-black flex items-center justify-center overflow-hidden">
+                    <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+
+                    {/* Overlay Guides */}
+                    <div className="absolute inset-8 border-2 border-white/20 rounded-xl pointer-events-none">
+                        <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-xl" />
+                        <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-xl" />
+                        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-xl" />
+                        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-xl" />
+                    </div>
+                </div>
+
+                <div className="h-32 bg-black/80 backdrop-blur-md flex items-center justify-around px-8 pb-4">
+                    <button
+                        onClick={stopCamera}
+                        className="p-4 rounded-full bg-surface/20 text-white hover:bg-surface/40 transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+
+                    <button
+                        onClick={capturePhoto}
+                        className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center active:scale-95 transition-transform"
+                    >
+                        <div className="w-16 h-16 bg-white rounded-full" />
+                    </button>
+
+                    <div className="w-12" /> {/* Spacer for balance */}
+                </div>
             </div>
         );
     }
