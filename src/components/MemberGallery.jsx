@@ -1,5 +1,6 @@
 import { ArrowLeft, Clock, Receipt, X, ZoomIn } from 'lucide-react';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 
 const MemberGallery = ({ memberId, onBack, currentProfile }) => {
     const member = currentProfile.members.find(m => m.id === memberId);
@@ -96,29 +97,31 @@ const MemberGallery = ({ memberId, onBack, currentProfile }) => {
             </div>
 
             {/* Lightbox / Zoom Modal */}
-            {zoomedImage && (
+            {/* Lightbox / Zoom Modal - Ported to body to escape transform stacking contexts */}
+            {zoomedImage && createPortal(
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-fade-in p-4"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-md animate-fade-in p-4"
                     onClick={() => setZoomedImage(null)}
                 >
                     {/* Close Button */}
                     <button
                         onClick={() => setZoomedImage(null)}
-                        className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-60"
+                        className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-[110]"
                         title="Close Zoom"
                     >
                         <X size={32} />
                     </button>
 
                     {/* Image Container */}
-                    <div className="relative max-w-full max-h-full overflow-hidden rounded-xl shadow-2xl" onClick={e => e.stopPropagation()}>
+                    <div className="relative w-full h-full flex items-center justify-center overflow-hidden" onClick={e => e.stopPropagation()}>
                         <img
                             src={zoomedImage.replace(/^(?:https?:)?\/\/[^/]+/, '')}
                             alt="Zoomed Receipt"
-                            className="max-w-full max-h-[90vh] object-contain select-none"
+                            className="max-w-full max-h-[90dvh] object-contain shadow-2xl rounded-lg select-none"
                         />
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
