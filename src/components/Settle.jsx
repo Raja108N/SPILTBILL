@@ -2,7 +2,7 @@ import { ArrowRight, Check, CheckCircle2, X } from 'lucide-react';
 import { useAppStore } from '../store/AppStore';
 
 const Settle = ({ onBack, settlements }) => {
-    const { currentProfile, actions } = useAppStore();
+    const { state, currentProfile, actions } = useAppStore();
 
     const transactions = settlements || [];
 
@@ -52,12 +52,14 @@ const Settle = ({ onBack, settlements }) => {
                                     <span className="text-2xl font-bold text-primary font-mono">£{t.amount.toFixed(2)}</span>
                                 </div>
 
-                                <button
-                                    onClick={() => handleSettleTransaction(t.from, t.to, t.amount)}
-                                    className="w-full py-3 rounded-xl bg-primary/10 hover:bg-primary hover:text-white text-primary font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-glow"
-                                >
-                                    <Check size={18} /> Mark as Paid
-                                </button>
+                                {state.is_admin && (
+                                    <button
+                                        onClick={() => handleSettleTransaction(t.from, t.to, t.amount)}
+                                        className="w-full py-3 rounded-xl bg-primary/10 hover:bg-primary hover:text-white text-primary font-semibold transition-all flex items-center justify-center gap-2 group-hover:shadow-glow"
+                                    >
+                                        <Check size={18} /> Mark as Paid
+                                    </button>
+                                )}
                             </div>
                         ))}
                     </div>

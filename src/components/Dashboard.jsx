@@ -248,23 +248,17 @@ const Dashboard = () => {
                         <div className="lg:col-span-12 xl:col-span-5">
                             <div className="glass-panel p-5 flex flex-col gap-6">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="p-2 bg-primary/10 rounded-xl text-primary"><Users size={20} /></div>
-                                        <h2 className="text-lg font-semibold text-text">Balances</h2>
-                                    </div>
-                                    {state.is_admin && (
-                                        <button
-                                            onClick={() => setView('settle')}
-                                            className="text-xs font-bold bg-surface hover:bg-surface-hover text-text px-4 py-2 rounded-full border border-border transition-all flex items-center gap-2 shadow-sm"
-                                        >
-                                            <Banknote size={14} className="text-primary" /> Settle Up
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => setView('settle')}
+                                        className="text-xs font-bold bg-surface hover:bg-surface-hover text-text px-4 py-2 rounded-full border border-border transition-all flex items-center gap-2 shadow-sm"
+                                    >
+                                        <Banknote size={14} className="text-primary" /> Settle Up
+                                    </button>
                                 </div>
                                 <BalancesList />
                                 <div className="md:hidden">
                                     {/* Mobile-only hint */}
-                                    {state.is_admin && <p className="text-center text-xs text-muted">Tap 'Settle Up' to clear debts.</p>}
+                                    <p className="text-center text-xs text-muted">Tap 'Settle Up' to clear debts.</p>
                                 </div>
                             </div>
                         </div>
